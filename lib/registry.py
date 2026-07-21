@@ -3,5 +3,6 @@ from __future__ import annotations
 
 from lib.providers.champions import Champions
 from lib.providers.phillip_island import PhillipIsland
+from lib.providers.smsp import SMSP
 
-PROVIDERS: list = [Champions(), PhillipIsland()]
+PROVIDERS: list = [Champions(), PhillipIsland(), SMSP()]
