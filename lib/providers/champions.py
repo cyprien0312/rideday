@@ -10,6 +10,8 @@ Structure (per event): `.bookride .bookinnerhead`
 """
 from __future__ import annotations
 
+import re
+
 from bs4 import BeautifulSoup
 
 from lib.models import Event
@@ -20,6 +22,22 @@ from lib.providers.base import (
     parse_price,
     parse_status,
 )
+
+
+def _clean_title(text: str) -> str:
+    """Strip literal markdown asterisks the CMS leaves in titles, collapse spaces."""
+    return re.sub(r"\s+", " ", text.replace("*", " ")).strip()
+
+
+def _price(price_el) -> tuple[str, float | None]:
+    """WooCommerce price: prefer the <ins> (sale/current) amount over <del> (original)."""
+    if price_el is None:
+        return "", None
+    amount = (price_el.select_one("ins .woocommerce-Price-amount")
+              or price_el.select_one(".woocommerce-Price-amount"))
+    raw = (amount or price_el).get_text(" ", strip=True)
+    display = re.sub(r"\$\s+", "$", raw)  # "$ 220.00" -> "$220.00"
+    return display, parse_price(display)
 
 
 class Champions(Provider):
@@ -38,7 +56,7 @@ class Champions(Provider):
             d_start, _ = parse_date(date_el.get_text(" ", strip=True))
             if d_start is None:
                 continue
-            track = title_a.get_text(" ", strip=True)
+            track = _clean_title(title_a.get_text(" ", strip=True))
             url = title_a.get("href", "").strip()
 
             state = None
@@ -52,12 +70,11 @@ class Champions(Provider):
             status, status_raw = parse_status(
                 fill_el.get_text(" ", strip=True) if fill_el else "")
 
-            price_el = head.select_one(".book-price")
-            price_disp = price_el.get_text(" ", strip=True) if price_el else ""
+            price_disp, price_aud = _price(head.select_one(".book-price"))
 
             events.append(Event(
                 provider=self.key, provider_name=self.name, title=track, track=track,
                 date_start=d_start, state=state,
-                price_display=price_disp, price_aud=parse_price(price_disp),
+                price_display=price_disp, price_aud=price_aud,
                 url=url, status=status, status_raw=status_raw))
         return events

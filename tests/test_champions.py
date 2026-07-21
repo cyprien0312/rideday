@@ -28,3 +28,15 @@ def test_status_and_state_present():
     assert any(e.status is Status.FILLING_FAST for e in EVENTS)
     assert any(e.status is Status.OPEN for e in EVENTS)
     assert all(e.state for e in EVENTS)  # every Champions card has a (STATE) label
+
+
+def test_sale_price_uses_current_not_original():
+    # Collie "DOUBLE" is on sale: original $360 struck through, current $300
+    sale = next(e for e in EVENTS if "Collie" in e.track and "DOUBLE" in e.track.upper())
+    assert sale.price_aud == 300.0                     # current price, not 360
+    assert "Original price was" not in sale.price_display
+    assert "$300" in sale.price_display.replace(" ", "")
+
+
+def test_titles_are_clean_of_markdown():
+    assert all("*" not in e.track for e in EVENTS)
