@@ -68,7 +68,7 @@ a { color: var(--blue); text-decoration: none; }
 /* ---------- Hero ---------- */
 .hero {
   text-align: center;
-  padding: 88px 24px 44px;
+  padding: 56px 24px 36px;
   max-width: 860px; margin: 0 auto;
   animation: rise 0.7s cubic-bezier(0.28, 0.11, 0.32, 1) both;
 }
