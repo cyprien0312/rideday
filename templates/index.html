@@ -7,77 +7,98 @@
   <link rel="stylesheet" href="{{ asset_base }}/style.css">
 </head>
 <body>
-<header>
-  <div class="titlebar">
-    <h1>🏁 澳洲摩托赛道日看板</h1>
-    {% if static_mode %}
-    <span class="updated">更新于 {{ generated_at }}</span>
-    {% else %}
-    <button id="refresh">立即刷新</button>
-    {% endif %}
-  </div>
+
+<nav class="globalnav">
+  <span class="wordmark">🏁&nbsp; rideday<span class="dim">·radar</span></span>
+  <span class="globalnav-meta">澳洲摩托赛道日</span>
+</nav>
+
+<header class="hero">
+  <h1>赛道日,<br>一个看板看全。</h1>
+  <p class="lead">Champions、Phillip Island、Sydney Motorsport Park 的排期、价格与余票,聚成一处。</p>
+  <p class="hero-meta">
+    <strong>{{ events|length }}</strong> 场活动
+    {% if static_mode %}<span class="dot-sep"></span>更新于 {{ generated_at }}{% endif %}
+  </p>
   <div class="runs">
     {% for key, name in provider_names.items() %}
       {% set r = runs.get(key) %}
       <span class="run {{ 'ok' if r and r.ok else ('bad' if r else 'none') }}">
-        {{ name }}:
-        {% if r and r.ok %}✓ {{ r.event_count }} 场 · {{ r.finished_at.strftime('%m-%d %H:%M') }}
-        {% elif r %}⚠ 抓取失败{% else %}尚未抓取{% endif %}
+        <i class="runled"></i>{{ name }}
+        {% if r and r.ok %}· {{ r.event_count }} 场 · {{ r.finished_at.strftime('%m-%d %H:%M') }}
+        {% elif r %}· 抓取失败{% else %}· 尚未抓取{% endif %}
       </span>
     {% endfor %}
   </div>
-  <div class="filters">
-    <input id="q" type="search" placeholder="搜索赛道…">
-    <select id="state"><option value="">全部州</option></select>
-    <select id="status">
-      <option value="">全部状态</option>
-      <option value="open">有票 (open)</option>
-      <option value="filling_fast">快满 (filling fast)</option>
-      <option value="sold_out">已售罄 (sold out)</option>
-      <option value="unknown">未知 (unknown)</option>
-    </select>
-    <span id="count"></span>
-  </div>
 </header>
 
-<table id="events">
-  <thead>
-    <tr>
-      <th data-sort="date">日期 ▲▼</th>
-      <th data-sort="track">赛道 ▲▼</th>
-      <th data-sort="state">州 ▲▼</th>
-      <th data-sort="price">价格 ▲▼</th>
-      <th>卖票情况</th>
-      <th>链接</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for e in events %}
-    <tr data-date="{{ e.date_start.isoformat() }}" data-track="{{ e.track|lower }}"
-        data-state="{{ e.state or '' }}" data-price="{{ e.price_aud or 0 }}"
-        data-status="{{ e.status.value }}">
-      <td class="date">
-        {{ e.date_start.strftime('%a %d %b') }}{% if e.date_end %} – {{ e.date_end.strftime('%d %b') }}{% endif %}
-        {% if e.start_time %}<small>{{ e.start_time }}</small>{% endif %}
-      </td>
-      <td class="track">{{ e.track }}<small>{{ e.provider_name }}</small></td>
-      <td>{{ e.state or '—' }}</td>
-      <td>{{ e.price_display or '—' }}</td>
-      <td><span class="st st-{{ e.status.value }}">{{ e.status_raw or e.status.value }}</span></td>
-      <td><a href="{{ e.url }}" target="_blank" rel="noopener">订票 ↗</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="controls">
+  <div class="controls-inner">
+    <div class="filters">
+      <input id="q" type="search" placeholder="搜索赛道…" autocomplete="off">
+      <div class="select-wrap"><select id="state"><option value="">全部州</option></select></div>
+      <div class="select-wrap"><select id="status">
+        <option value="">全部状态</option>
+        <option value="open">有票</option>
+        <option value="filling_fast">快满</option>
+        <option value="sold_out">已售罄</option>
+        <option value="unknown">未知</option>
+      </select></div>
+    </div>
+    <div class="controls-right">
+      <span id="count"></span>
+      {% if not static_mode %}<button id="refresh">立即刷新</button>{% endif %}
+    </div>
+  </div>
+</div>
 
-{% if not events %}
-<p class="empty">还没有数据。点右上角「立即刷新」抓取三个网站。</p>
-{% endif %}
+<main>
+  <div class="table-surface">
+    <div class="table-scroll">
+      <table id="events">
+        <thead>
+          <tr>
+            <th data-sort="date">日期</th>
+            <th data-sort="track">赛道</th>
+            <th data-sort="state">州</th>
+            <th data-sort="price" class="num">价格</th>
+            <th>卖票情况</th>
+            <th class="link-col">链接</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in events %}
+          <tr data-date="{{ e.date_start.isoformat() }}" data-track="{{ e.track|lower }}"
+              data-state="{{ e.state or '' }}" data-price="{{ e.price_aud or 0 }}"
+              data-status="{{ e.status.value }}">
+            <td class="date">
+              <span class="d-main">{{ e.date_start.strftime('%a %d %b') }}{% if e.date_end %} – {{ e.date_end.strftime('%d %b') }}{% endif %}</span>
+              {% if e.start_time %}<small>{{ e.start_time }}</small>{% endif %}
+            </td>
+            <td class="track"><span class="t-main">{{ e.track }}</span><small>{{ e.provider_name }}</small></td>
+            <td class="state">{{ e.state or '—' }}</td>
+            <td class="num">{{ e.price_display or '—' }}</td>
+            <td><span class="st st-{{ e.status.value }}">{{ e.status_raw or e.status.value }}</span></td>
+            <td class="link-col"><a href="{{ e.url }}" target="_blank" rel="noopener">订票<span class="arr"> ↗</span></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if not events %}
+    <p class="empty">还没有数据。{% if not static_mode %}点右上角「立即刷新」抓取三个网站。{% else %}稍后自动刷新。{% endif %}</p>
+    {% endif %}
+  </div>
+</main>
 
 <footer>
-  rideday-radar · 数据来自各官网、仅供参考,以官网为准 · 每行链接直达官方订票页
-  {% if static_mode %}<br>由 GitHub Actions 每 6 小时自动抓取并重新发布{% else %}· 后台每 3 小时自动刷新{% endif %}
+  <p>数据来自各官网、仅供参考,以官网为准。每行链接直达官方订票页。</p>
+  <p class="legal">
+    {% if static_mode %}由 GitHub Actions 每 6 小时自动抓取并重新发布{% else %}后台每 3 小时自动刷新{% endif %}
+    · rideday-radar
+  </p>
 </footer>
+
 <script src="{{ asset_base }}/app.js"></script>
 </body>
 </html>

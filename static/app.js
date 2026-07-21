@@ -31,7 +31,8 @@ statusSel.addEventListener("change", applyFilter);
 
 // column sorting
 const asc = {};
-document.querySelectorAll("th[data-sort]").forEach((th) =>
+const headers = document.querySelectorAll("th[data-sort]");
+headers.forEach((th) =>
   th.addEventListener("click", () => {
     const key = th.dataset.sort;
     asc[key] = !asc[key];
@@ -45,6 +46,9 @@ document.querySelectorAll("th[data-sort]").forEach((th) =>
         return (av > bv ? 1 : av < bv ? -1 : 0) * (asc[key] ? 1 : -1);
       })
       .forEach((r) => tbody.appendChild(r));
+    // reflect sort state in the header chevron (Action Blue arrow)
+    headers.forEach((h) => h.removeAttribute("data-dir"));
+    th.setAttribute("data-dir", asc[key] ? "asc" : "desc");
   })
 );
 
