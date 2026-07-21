@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="icon" href="/templates/pird/images/favicon.ico">
+    
+        <title>Phillip Island Ride Days</title>
+    
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/templates/shared/fontawesome/css/all.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="/templates/shared/css/kendoui.2018.2.516/kendo.bootstrap-v4.min.css">
+    
+        <link href="/templates/pird/style.css?v=1.0.2" rel="stylesheet">
+        <link href="/templates/pird/form.css?v=1.0.2" rel="stylesheet">
+        <link href="/templates/pird/booking.css?v=1.0.2" rel="stylesheet">
+        <link href="/templates/pird/media.css?v=1.0.2" rel="stylesheet">
+    </head>
+    
+    <body>
+    <script>
+    	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    
+    	ga('create', 'UA-21434978-1', 'phillipislandridedays.com.au');
+    	ga('send', 'pageview');
+    
+    </script>
+            <header class="p-3 dark">
+            <div class="menu">
+                <div class="d-flex flex-wrap align-items-right justify-content-right justify-content-lg-end">
+                    <a href="javascript: void(0)" class="a-button" data-menu="ride-days">Ride Days</a>
+                    <a href="javascript: void(0)" class="a-button" data-menu="prepare">Prepare for your day</a>
+                    <a href="javascript: void(0)" class="a-button" data-menu="about">About&nbsp;Us</a>
+                    <a href="/pird-my-account" class="a-button bordered" type="button">My&nbsp;Account</a>
+                    <a href="/pird-ride-days" class="a-button primary" type="button">Book&nbsp;Now</a>
+                </div>
+            </div>
+            <div class="mobile-menu">
+                <a href="javascript:void(0)" id="mobile-menu-button">
+                    <i class="fa-solid fa-bars"></i>
+                </a>
+            </div>
+            <svg class="top-right-bg" xmlns="http://www.w3.org/2000/svg" width="408" height="43" viewBox="0 0 408 43" fill="none">
+                <path d="M38.0977 43C31.8958 43 0 0 0 0H408V43H38.0977Z" fill="#3C4B64"/>
+            </svg>
+            <div class="google-translate">
+                <div id="google_translate_element"></div>
+                <script type="text/javascript">
+                    function googleTranslateElementInit() {
+                        new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL}, 'google_translate_element');
+                    }
+                </script>
+                <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+            </div>
+            <a href="/">
+                <img class="logo" src="/templates/pird/assets/logo.png"/>
+            </a>
+        </header>
+        <div class="mega-menu ride-days" style="display: none">
+            <div class="row">
+                <div class="col-7">
+                    <div class="left-content">
+                        <div class="row">
+                            <div class="col-6">
+                                <h4>What's a Ride Day? <i class="fa fa-arrow-right ms-2"></i></h4>
+                                <a href="/pird-safety">Controlled Environment</a>
+                                <a href="/pird-safety#graded-groups">Graded groups</a>
+                                <a href="/pird-safety#first-time">First timer’s program</a>
+                                <a href="/pird-licence-policies">Licence &amp; Policies</a>
+                            </div>
+                            <div class="col-6">
+                                <h4>On The Day <i class="fa fa-arrow-right ms-2"></i></h4>
+                                <a href="/pird-on-the-day#circuit-entry">Circuit Entry Procedure </a>
+                                <a href="/pird-on-the-day#track-schedule">Track schedule </a>
+                                <a href="/pird-on-the-day#tyre-service">Tyre service</a>
+                                <a href="/pird-on-the-day#photography">Photography</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5 bg-grey">
+                    <div class="right-content">
+                        <!--<div class="close">
+                            <a href="#">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 23 23" fill="none">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M14.4818 11.4453L22.5402 19.5037C22.7738 19.8151 22.8906 20.1655 22.8906 20.5548C22.8906 20.9441 22.7738 21.2555 22.5402 21.4891L21.4891 22.5402C21.2555 22.7738 20.9441 22.8906 20.5548 22.8906C20.1655 22.8906 19.8151 22.7738 19.5037 22.5402L11.4453 14.365L3.38687 22.5402C3.07543 22.7738 2.72507 22.8906 2.33577 22.8906C1.94648 22.8906 1.63504 22.7738 1.40146 22.5402L0.350366 21.4891C0.116789 21.2555 0 20.9441 0 20.5548C0 20.1655 0.116789 19.8151 0.350366 19.5037L8.52557 11.4453L0.350366 3.38687C0.116789 3.07543 0 2.72507 0 2.33577C0 1.94648 0.116789 1.63504 0.350366 1.40146L1.40146 0.350366C1.63504 0.116789 1.94648 0 2.33577 0C2.72507 0 3.07543 0.116789 3.38687 0.350366L11.4453 8.40878L19.5037 0.350366C19.8151 0.116789 20.1655 0 20.5548 0C20.9441 0 21.2555 0.116789 21.4891 0.350366L22.5402 1.40146C22.7738 1.63504 22.8906 1.94648 22.8906 2.33577C22.8906 2.72507 22.7738 3.07543 22.5402 3.38687L14.4818 11.4453Z" fill="#1D232D"/>
+                                </svg>
+                            </a>
+                        </div>-->
+                        <div class="icon-button">
+                            <div class="float-start">
+                                <a href="/pird-safety" class="icon-button-image">
+                                    <img src="/templates/pird/assets/safety.png"/>
+                                </a>
+                            </div>
+                            <div class="float-start">
+                                <a href="/pird-safety-briefing">
+                                    <span>SAFETY</span> <i class="fa fa-arrow-right ms-2"></i>
+                                </a>
+                                <p>Full Safety Briefing</p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="icon-button grey">
+                            <div class="float-start">
+                                <a href="/pird_pricing" class="icon-button-image">
+                                    <img src="/templates/pird/assets/pricing.png"/>
+                                </a>
+                            </div>
+                            <div class="float-start">
+                                <a href="/pird_pricing">
+                                    <span>PRICING</span> <i class="fa fa-arrow-right ms-2"></i>
+                                </a>
+                                <p>Current Prices</p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="icon-button grey">
+                            <div class="float-start">
+                                <a href="/pird-voucher" class="icon-button-image">
+                                    <img src="/templates/pird/assets/gift-cards.png"/>
+                                </a>
+                            </div>
+                            <div class="float-start">
+                                <a href="/pird-voucher">
+                                    <span>GIFT VOUCHERS</span> <i class="fa fa-arrow-right ms-2"></i>
+                                </a>
+                                <p>Gift Vouchers</p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mega-menu prepare" style="display: none">
+            <div class="row">
+                <div class="col-7">
+                    <div class="left-content">
+                        <div class="row">
+                            <div class="col-7">
+                                <h4>Before the day <i class="fa fa-arrow-right ms-2"></i></h4>
+                                <a href="/pird-riding-gear">Motorcycle &amp; Gear Requirements</a>
+                                <a href="/pird-safety-briefing">Safety briefing</a>
+                                <a href="/pird_faqs">Pre-ride FAQ</a>
+                                <a href="/pird-ride-day-forms">Ride Day Forms</a>
+                            </div>
+                            <div class="col-5">
+                                <h4>Your Options <i class="fa fa-arrow-right ms-2"></i></h4>
+                                <a href="/pird-your-options#garages">Garages</a>
+                                <a href="/pird-your-options#tyre-service">Tyre Service</a>
+                                <a href="/pird-your-options#bike-gear-hire">Bike &amp; Gear Hire</a>
+                                <a href="/pird-full-factory-experience">Full Factory Experience</a>
+                                <a href="/pird-your-options#photography">Photography</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5 bg-grey">
+                    <div class="right-content">
+                        <div class="right-content-detail">
+                            <h4>Get the most out of<br>your day</h4>
+                            <img src="/templates/pird/assets/get-the-most.png"/>
+                            <p>Make Sure You’re Ready To Ride!</p>
+                            <a href="/pird-get-the-most">read more ></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mega-menu about" style="display: none">
+            <div class="row">
+                <div class="col-7">
+                    <div class="left-content">
+                        <div class="icon-button">
+                            <div class="float-start">
+                                <a href="/pird_about" class="icon-button-image">
+                                    <img src="/templates/pird/assets/who-we-are.png"/>
+                                </a>
+                            </div>
+                            <div class="float-start">
+                                <a href="/pird_about">
+                                    <span>WHO WE ARE</span> <i class="fa fa-arrow-right ms-2"></i>
+                                </a>
+                                <p></p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="icon-button grey">
+                            <div class="float-start">
+                                <a href="/pird_news" class="icon-button-image">
+                                    <img src="/templates/pird/assets/our-news.png"/>
+                                </a>
+                            </div>
+                            <div class="float-start">
+                                <a href="/pird_news">
+                                    <span>OUR NEWS</span> <i class="fa fa-arrow-right ms-2"></i>
+                                </a>
+                                <p></p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="icon-button grey">
+                            <div class="float-start">
+                                <a href="/pird_contact" class="icon-button-image">
+                                    <img src="/templates/pird/assets/contact-us.png"/>
+                                </a>
+                            </div>
+                            <div class="float-start">
+                                <a href="/pird_contact">
+                                    <span>CONTACT US</span> <i class="fa fa-arrow-right ms-2"></i>
+                                </a>
+                                <p></p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5 bg-grey">
+                    <div class="right-content">
+                        <div class="right-content-detail">
+                            <h4>Make Sure You’re Ready To Ride!</h4>
+                            <img src="/templates/pird/assets/track.png"/>
+                            <p></p>
+                            <a href="/pird-get-the-most">read more ></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mini-menu" style="display: none">
+            <div class="accordion" id="mobileMenu">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobileRideDays" aria-expanded="false" aria-controls="collapseOne">
+                            RIDE DAYS
+                        </button>
+                    </h2>
+                    <div id="mobileRideDays" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <h4>What's a Ride Day <i class="fa fa-arrow-right ms-2"></i></h4>
+                            <div>
+                                <a href="/pird-safety">Controlled Environment</a>
+                            </div>
+                            <div>
+                                <a href="/pird-safety#first-time">First timer’s program</a>
+                            </div>
+                            <div>
+                                <a href="/pird-safety#graded-groups">Graded groups</a>
+                            </div>
+
+                            <h4 class="mt-3">On The Day <i class="fa fa-arrow-right ms-2"></i></h4>
+                            <div>
+                                <a href="/pird-on-the-day">Track schedule </a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#bike-gear-hire">Bike and gear hire</a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#garages">Garages</a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#tyre-service">Tyre service</a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#photography">Photography</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Prepare For Your Day
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <h4>Before the day <i class="fa fa-arrow-right ms-2"></i></h4>
+                            <div>
+                                <a href="/pird-riding-gear">Motorcycle &amp; gear requirements</a>
+                            </div>
+                            <div>
+                                <a href="/pird-safety-briefing">Safety briefing</a>
+                            </div>
+                            <div>
+                                <a href="/pird_faqs">Pre-ride FAQ</a>
+                            </div>
+                            <div>
+                                <a href="/pird-ride-day-forms">Ride Day Forms</a>
+                            </div>
+
+                            <h4 class="mt-3">Your Options <i class="fa fa-arrow-right ms-2"></i></h4>
+                            <div>
+                                <a href="/pird-on-the-day#garages">Garages</a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#tyre-service">Tyre Service</a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#bike-gear-hire">Bike and gear hire</a>
+                            </div>
+                            <div>
+                                <a href="/pird-on-the-day#photography">Photography</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            About Us
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="icon-button">
+                                <div class="float-start">
+                                    <a href="/pird_about" class="icon-button-image">
+                                        <img src="/templates/pird/assets/who-we-are.png"/>
+                                    </a>
+                                </div>
+                                <div class="float-start">
+                                    <a href="/pird_about">
+                                        <span>WHO WE ARE</span> <i class="fa fa-arrow-right ms-2"></i>
+                                    </a>
+                                    <p>Subtext about who we are</p>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="icon-button grey">
+                                <div class="float-start">
+                                    <a href="/pird_news" class="icon-button-image">
+                                        <img src="/templates/pird/assets/our-news.png"/>
+                                    </a>
+                                </div>
+                                <div class="float-start">
+                                    <a href="/pird_news">
+                                        <span>OUR NEWS</span> <i class="fa fa-arrow-right ms-2"></i>
+                                    </a>
+                                    <p>Subtext about our news</p>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="icon-button grey">
+                                <div class="float-start">
+                                    <a href="/pird_contact" class="icon-button-image">
+                                        <img src="/templates/pird/assets/contact-us.png"/>
+                                    </a>
+                                </div>
+                                <div class="float-start">
+                                    <a href="/pird_contact">
+                                        <span>CONTACT US</span> <i class="fa fa-arrow-right ms-2"></i>
+                                    </a>
+                                    <p>Subtext about contact us</p>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="/pird-my-account" class="a-button"">My&nbsp;Account</a>
+            <a href="/pird-ride-days" class="a-button primary">Book&nbsp;Now</a>
+        </div>
+        
+    <main role="main">
+        <div class="inner-banner">
+            <h1>Book A Ride</h1>
+        </div>
+        <img src="/templates/pird/assets/circuit-outline.svg" class="circuit-outline"/>
+        <div class="container-fluid">
+            <div class="row">
+                        <div class="steps">
+            <div class="step">
+                <hr>
+                <div class="icon step-closed"></div>
+                <div class="label on">Find a Ride Date</div>
+            </div>
+            <div class="step">
+                <hr>
+                <div class="icon step-open"></div>
+                <div class="label ">Rider Details</div>
+            </div>
+            <div class="step">
+                <hr>
+                <div class="icon step-open"></div>
+                <div class="label ">Garage</div>
+            </div>
+            <div class="step">
+                <hr>
+                <div class="icon step-open"></div>
+                <div class="label ">Tyres</div>
+            </div>
+            <div class="step">
+                <div class="icon step-open"></div>
+                <div class="label ">Confirm &amp; Pay</div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix"></div>
+                <div id="packageWindow" style="display: none">
+            <div class="p-4">
+                <h3 class="primary mb-3">Select your ride day package</h3>
+                <div class="row">
+                    <div class="col-12">
+                        <select id="packageId" class="form-select"></select>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12 text-center">
+                        <a href="#" class="a-button primary" id="beginBooking" data-brand="pird">BEGIN BOOKING</a>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <small>NOTE - Additional riders and/or dates can be added during the booking process</small>
+                </div>
+            </div>
+        </div>
+        <div class="bg-pale-grey">
+            <div class="container">
+                <div id="find-a-ride-date" class="mt-5">
+                                            <div class="card">
+                            <div class="card-header open" id="heading2026-09">
+                                <div class="i-wrap">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <button class="btn btn-link h3" data-toggle="collapse" data-heading="heading2026-09" data-target="#collapse2026-09" aria-expanded="true" aria-controls="collapse2026-09">
+                                    September 2026                                </button>
+                            </div>
+
+                            <div id="collapse2026-09" class="collapse body show" aria-labelledby="heading2026-09">
+                                <div class="row">
+                                                                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Mon 07 Sep</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101359" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Thu 24 Sep</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101360" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Fri 25 Sep</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $365</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101361" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                        </div>
+                            </div>
+                        </div>
+                                                <div class="card">
+                            <div class="card-header open" id="heading2026-10">
+                                <div class="i-wrap">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <button class="btn btn-link h3" data-toggle="collapse" data-heading="heading2026-10" data-target="#collapse2026-10" aria-expanded="true" aria-controls="collapse2026-10">
+                                    October 2026                                </button>
+                            </div>
+
+                            <div id="collapse2026-10" class="collapse body show" aria-labelledby="heading2026-10">
+                                <div class="row">
+                                                                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Mon 12 Oct</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101362" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Tue 13 Oct</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101363" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                        </div>
+                            </div>
+                        </div>
+                                                <div class="card">
+                            <div class="card-header " id="heading2026-11">
+                                <div class="i-wrap">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <button class="btn btn-link h3" data-toggle="collapse" data-heading="heading2026-11" data-target="#collapse2026-11" aria-expanded="true" aria-controls="collapse2026-11">
+                                    November 2026                                </button>
+                            </div>
+
+                            <div id="collapse2026-11" class="collapse body " aria-labelledby="heading2026-11">
+                                <div class="row">
+                                                                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Mon 02 Nov</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101364" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Tue 03 Nov</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $365</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101365" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Wed 04 Nov</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101366" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Mon 16 Nov</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101367" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Tue 17 Nov</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101368" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Wed 18 Nov</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101369" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                        </div>
+                            </div>
+                        </div>
+                                                <div class="card">
+                            <div class="card-header " id="heading2026-12">
+                                <div class="i-wrap">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <button class="btn btn-link h3" data-toggle="collapse" data-heading="heading2026-12" data-target="#collapse2026-12" aria-expanded="true" aria-controls="collapse2026-12">
+                                    December 2026                                </button>
+                            </div>
+
+                            <div id="collapse2026-12" class="collapse body " aria-labelledby="heading2026-12">
+                                <div class="row">
+                                                                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Mon 07 Dec</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101370" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Tue 08 Dec</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101371" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Mon 21 Dec</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101372" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Tue 22 Dec</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101373" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                            <div class="event   ">
+                                                <div class="date">
+                                                    <i class="fa-solid fa-calendar-days"></i>
+                                                    <h4>Wed 23 Dec</h4>
+                                                </div>
+                                                <div class="detail">
+                                                    <h3>From $315</h3>
+                                                    <p>7:00am</p>
+                                                                                                                                                        </div>
+                                                <div class="status">
+                                                    <button type="button" class="book book-now" data-id="101374" data-brand="pird" data-wl="false" data-popup="">Book Now</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                        </div>
+                            </div>
+                        </div>
+                                        </div>
+            </div>
+        </div>
+        
+            </div>
+        </div>
+    </main>
+<div class="footer-1">
+    <h4>Our Associates</h4>
+    <div class="container">
+        <div class="row">
+            <!--<div class="col-md-3 text-center">
+                <a href="https://www.dunloptyres.com.au/motorcycle-tyres" target="_blank">
+                    <img src="/templates/pird/assets/dunlop-logo.png"/>
+                </a>
+            </div>-->
+            <div class="col-md-3 text-center">
+                <a href="https://www.bmw-motorrad.com.au/en/home.html#/filter-all" target="_blank">
+                    <img src="/templates/pird/assets/bmw-logo.png" style="padding-top: 10px"/>
+                </a>
+            </div>
+            <div class="col-md-3 text-center">
+                <a href="https://www.pirelli.com/tyres/en-au/motorcycle/homepage" target="_blank">
+                    <img src="/templates/pird/assets/pirelli-logo.jpg" height="50" style="padding-top: 15px"/>
+                </a>
+            </div>
+            <div class="col-md-3 text-center">
+                <a href="https://monzaimports.com.au/brands/alpinestars/" target="_blank">
+                    <img src="/templates/pird/assets/alpinestars-logo.png" height="50" style="padding-top: 10px"/>
+                </a>
+            </div>
+            <div class="col-md-3 text-center">
+                <a href="https://www.ducati.com/au/en/home" target="_blank">
+                    <img src="/templates/pird/assets/ducati-logo.jpg"/>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer-2">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="float-start">
+                    <a class="white-circle" href="/pird-voucher">
+                        <i class="fas fa-gift"></i>
+                    </a>
+                </div>
+                <div class="float-start">
+                    <h4>Buy a gift voucher</h4>
+                    <p>Give a friend the ride of their life</p>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="float-start">
+                    <a class="white-circle" href="/pird-sign-up">
+                        <i class="fas fa-envelope-open"></i>
+                    </a>
+                </div>
+                <div class="float-start">
+                    <h4>Join the club</h4>
+                    <p>Subscribe for updates & latest news</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="float-start">
+                    <p class="bold">© 2026 MEGA. All rights reserved</p>
+                </div>
+                <div class="float-start">
+                    <a href="/pird-privacy">Privacy</a>
+                </div>
+                <div class="float-start">
+                    <a href="/pird-terms">Terms &amp; Conditions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<img src="/templates/pird/assets/footer-track.png" class="footer-track"/>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="/scripts/framework/libs/kendoui.2018.2.516/kendo.all.min.js"></script>
+<script src="/framework-scripts/Utils.js"></script>
+<script src="/scripts/apps/MEGA.js?v=1.0"></script>
+<script src="/scripts/apps/events/FindARideDay.js?v=1.5.6"></script>
+</body>
+</html>
