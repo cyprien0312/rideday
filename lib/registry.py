@@ -2,5 +2,6 @@
 from __future__ import annotations
 
 from lib.providers.champions import Champions
+from lib.providers.phillip_island import PhillipIsland
 
-PROVIDERS: list = [Champions()]
+PROVIDERS: list = [Champions(), PhillipIsland()]
