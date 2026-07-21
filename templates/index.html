@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>rideday-radar · 澳洲赛道日看板</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="titlebar">
+    <h1>🏁 澳洲摩托赛道日看板</h1>
+    <button id="refresh">立即刷新</button>
+  </div>
+  <div class="runs">
+    {% for key, name in provider_names.items() %}
+      {% set r = runs.get(key) %}
+      <span class="run {{ 'ok' if r and r.ok else ('bad' if r else 'none') }}">
+        {{ name }}:
+        {% if r and r.ok %}✓ {{ r.event_count }} 场 · {{ r.finished_at.strftime('%m-%d %H:%M') }}
+        {% elif r %}⚠ 抓取失败{% else %}尚未抓取{% endif %}
+      </span>
+    {% endfor %}
+  </div>
+  <div class="filters">
+    <input id="q" type="search" placeholder="搜索赛道…">
+    <select id="state"><option value="">全部州</option></select>
+    <select id="status">
+      <option value="">全部状态</option>
+      <option value="open">有票 (open)</option>
+      <option value="filling_fast">快满 (filling fast)</option>
+      <option value="sold_out">已售罄 (sold out)</option>
+      <option value="unknown">未知 (unknown)</option>
+    </select>
+    <span id="count"></span>
+  </div>
+</header>
+
+<table id="events">
+  <thead>
+    <tr>
+      <th data-sort="date">日期 ▲▼</th>
+      <th data-sort="track">赛道 ▲▼</th>
+      <th data-sort="state">州 ▲▼</th>
+      <th data-sort="price">价格 ▲▼</th>
+      <th>卖票情况</th>
+      <th>链接</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in events %}
+    <tr data-date="{{ e.date_start.isoformat() }}" data-track="{{ e.track|lower }}"
+        data-state="{{ e.state or '' }}" data-price="{{ e.price_aud or 0 }}"
+        data-status="{{ e.status.value }}">
+      <td class="date">
+        {{ e.date_start.strftime('%a %d %b') }}{% if e.date_end %} – {{ e.date_end.strftime('%d %b') }}{% endif %}
+        {% if e.start_time %}<small>{{ e.start_time }}</small>{% endif %}
+      </td>
+      <td class="track">{{ e.track }}<small>{{ e.provider_name }}</small></td>
+      <td>{{ e.state or '—' }}</td>
+      <td>{{ e.price_display or '—' }}</td>
+      <td><span class="st st-{{ e.status.value }}">{{ e.status_raw or e.status.value }}</span></td>
+      <td><a href="{{ e.url }}" target="_blank" rel="noopener">订票 ↗</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if not events %}
+<p class="empty">还没有数据。点右上角「立即刷新」抓取三个网站。</p>
+{% endif %}
+
+<footer>rideday-radar · 数据仅供参考,以各官网为准 · 后台每 3 小时自动刷新</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>
