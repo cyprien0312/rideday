@@ -3,6 +3,9 @@ data/
 *.db
 *.sqlite3
 
+# static build output (produced by CI, not committed)
+dist/
+
 # python
 .venv/
 __pycache__/

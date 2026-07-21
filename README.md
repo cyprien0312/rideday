@@ -12,13 +12,29 @@
 | `phillip_island` | Phillip Island Ride Days (PIRD) | https://www.phillipislandridedays.com.au/pird-ride-days |
 | `smsp` | Sydney Motorsport Park Ride Days | https://www.smsprd.com/smsprd-ride-days |
 
-## 快速开始
+## 在线版 (GitHub Pages)
+
+**https://cyprien0312.github.io/rideday/**
+
+这是一个静态快照:GitHub Actions 每 6 小时(以及每次 push、手动触发)在云端跑一遍抓取,
+生成把数据烤进去的静态页并发布到 Pages。静态版没有实时「立即刷新」按钮(纯静态无后端),
+页面显示"更新于 …";想立刻刷新可在 repo 的 **Actions → Build & deploy → Run workflow** 手动触发。
+
+本地实时版(带刷新按钮、可选任意刷新间隔)见下方「快速开始」——两种模式共用同一套 adapter。
+
+## 快速开始(本地实时版)
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ./scripts/run.sh            # 或: .venv/bin/python app.py
 # 打开 http://127.0.0.1:8765
+```
+
+## 构建静态版(与 Pages 同款)
+
+```bash
+.venv/bin/python scripts/build_static.py   # 输出 dist/index.html + dist/static/
 ```
 
 首次启动会在后台抓一次(几秒),抓完刷新页面即可看到数据。之后后台每 3 小时自动刷新。

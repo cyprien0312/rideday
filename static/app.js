@@ -48,16 +48,19 @@ document.querySelectorAll("th[data-sort]").forEach((th) =>
   })
 );
 
-// manual refresh
-document.querySelector("#refresh").addEventListener("click", async (e) => {
-  const btn = e.target;
-  btn.disabled = true;
-  btn.textContent = "抓取中…";
-  try {
-    await fetch("/api/refresh", { method: "POST" });
-  } finally {
-    location.reload();
-  }
-});
+// manual refresh (server mode only; absent on the static GitHub Pages build)
+const refreshBtn = document.querySelector("#refresh");
+if (refreshBtn) {
+  refreshBtn.addEventListener("click", async (e) => {
+    const btn = e.target;
+    btn.disabled = true;
+    btn.textContent = "抓取中…";
+    try {
+      await fetch("/api/refresh", { method: "POST" });
+    } finally {
+      location.reload();
+    }
+  });
+}
 
 applyFilter();

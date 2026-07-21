@@ -55,6 +55,8 @@ def create_app() -> FastAPI:
             "events": store.upcoming_events(),
             "runs": store.latest_runs(),
             "provider_names": {p.key: p.name for p in PROVIDERS},
+            "asset_base": "/static",
+            "static_mode": False,
         })
 
     @app.get("/api/events")

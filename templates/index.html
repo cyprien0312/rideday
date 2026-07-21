@@ -4,13 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>rideday-radar · 澳洲赛道日看板</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="{{ asset_base }}/style.css">
 </head>
 <body>
 <header>
   <div class="titlebar">
     <h1>🏁 澳洲摩托赛道日看板</h1>
+    {% if static_mode %}
+    <span class="updated">更新于 {{ generated_at }}</span>
+    {% else %}
     <button id="refresh">立即刷新</button>
+    {% endif %}
   </div>
   <div class="runs">
     {% for key, name in provider_names.items() %}
@@ -70,7 +74,10 @@
 <p class="empty">还没有数据。点右上角「立即刷新」抓取三个网站。</p>
 {% endif %}
 
-<footer>rideday-radar · 数据仅供参考,以各官网为准 · 后台每 3 小时自动刷新</footer>
-<script src="/static/app.js"></script>
+<footer>
+  rideday-radar · 数据来自各官网、仅供参考,以官网为准 · 每行链接直达官方订票页
+  {% if static_mode %}<br>由 GitHub Actions 每 6 小时自动抓取并重新发布{% else %}· 后台每 3 小时自动刷新{% endif %}
+</footer>
+<script src="{{ asset_base }}/app.js"></script>
 </body>
 </html>

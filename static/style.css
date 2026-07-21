@@ -32,6 +32,7 @@ h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; }
   padding: 10px 18px; font-size: 15px; font-weight: 600; cursor: pointer;
 }
 #refresh:disabled { opacity: .6; cursor: wait; }
+.updated { color: var(--muted); font-size: 13px; white-space: nowrap; }
 
 .runs { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 .run { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); }
