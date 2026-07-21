@@ -1,0 +1,14 @@
+# data / cache
+data/
+*.db
+*.sqlite3
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# os
+.DS_Store
