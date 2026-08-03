@@ -29,6 +29,18 @@
       </span>
     {% endfor %}
   </div>
+
+  {% if feeds %}
+  <div class="subscribe">
+    <span class="sub-label">订阅到日历</span>
+    {% for f in feeds %}
+      <a class="sub-chip{% if f.slug == 'vic' %} primary{% endif %}" href="{{ f.href }}">{{ f.label }}<i>{{ f.count }}</i></a>
+    {% endfor %}
+  </div>
+  <p class="sub-hint">
+    {% if static_mode %}点一下即可在「日历」App 里订阅,之后每 6 小时自动更新。{% else %}本地版点开是 .ics 文件;要长期订阅用线上版的 webcal 链接。{% endif %}
+  </p>
+  {% endif %}
 </header>
 
 <div class="controls">

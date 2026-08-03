@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import os
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
+from lib.ics import build_feeds, render_feed
 from lib.registry import PROVIDERS
 from lib.scrape import run_all
 from lib.store import Store
@@ -51,17 +53,31 @@ def create_app() -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request):
+        events = store.upcoming_events()
         return templates.TemplateResponse(request, "index.html", {
-            "events": store.upcoming_events(),
+            "events": events,
             "runs": store.latest_runs(),
             "provider_names": {p.key: p.name for p in PROVIDERS},
             "asset_base": "/static",
             "static_mode": False,
+            "feeds": [{"slug": f.slug, "label": f.label, "count": len(f.events),
+                       "href": f"/calendar/{f.filename}"} for f in build_feeds(events)],
         })
 
     @app.get("/api/events")
     def api_events():
         return JSONResponse([_event_json(e) for e in store.upcoming_events()])
+
+    @app.api_route("/calendar/{slug}.ics", methods=["GET", "HEAD"])
+    def calendar(slug: str):
+        """Subscribable .ics per state (plus `all`) — same feeds the Pages build publishes."""
+        feeds = {f.slug: f for f in build_feeds(store.upcoming_events())}
+        feed = feeds.get(slug.lower())
+        if feed is None:
+            raise HTTPException(status_code=404, detail=f"no feed for {slug!r}")
+        body = render_feed(feed, now=datetime.now(timezone.utc))
+        return Response(body, media_type="text/calendar; charset=utf-8", headers={
+            "Content-Disposition": f'inline; filename="rideday-{feed.filename}"'})
 
     @app.post("/api/refresh")
     def api_refresh():

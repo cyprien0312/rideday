@@ -27,6 +27,28 @@ def test_index_and_events_api(tmp_path, monkeypatch):
     assert j and j[0]["track"] == "Broadford" and j[0]["status"] == "open"
 
 
+def test_calendar_feed_is_served_per_state_and_all(tmp_path, monkeypatch):
+    monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
+    application = appmod.create_app()
+    _seed(application)
+    client = TestClient(application)
+
+    r = client.get("/calendar/all.ics")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/calendar")
+    assert "BEGIN:VEVENT" in r.text and "Broadford" in r.text
+
+    assert client.get("/calendar/vic.ics").status_code == 404  # seeded event has no state
+    assert client.get("/calendar/nope.ics").status_code == 404
+
+
+def test_index_links_the_calendar_feeds(tmp_path, monkeypatch):
+    monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
+    application = appmod.create_app()
+    _seed(application)
+    assert "/calendar/all.ics" in TestClient(application).get("/").text
+
+
 def test_refresh_endpoint_runs_providers(tmp_path, monkeypatch):
     monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
     application = appmod.create_app()

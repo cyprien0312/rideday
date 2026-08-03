@@ -119,6 +119,31 @@ a { color: var(--blue); text-decoration: none; }
 .run.ok .runled { background: var(--ok); }
 .run.bad .runled { background: var(--sold); }
 
+/* ---------- Calendar subscription ---------- */
+.subscribe {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 8px; margin-top: 26px;
+}
+.sub-label { font-size: 13px; color: var(--ink-muted); letter-spacing: -0.01em; margin-right: 2px; }
+.sub-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: 980px;
+  border: 1px solid var(--hairline); background: var(--canvas);
+  font-size: 13px; font-weight: 500; color: var(--ink-80); text-decoration: none;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.sub-chip i {
+  font-style: normal; font-size: 11px; color: var(--ink-48);
+  font-variant-numeric: tabular-nums;
+}
+.sub-chip:hover { border-color: var(--blue); color: var(--blue); }
+.sub-chip:hover i { color: var(--blue); }
+.sub-chip:active { transform: scale(0.96); }
+.sub-chip:focus-visible { outline: 2px solid var(--blue-focus); outline-offset: 2px; }
+.sub-chip.primary { border-color: var(--blue); color: var(--blue); background: rgba(0, 102, 204, 0.06); }
+.sub-chip.primary i { color: var(--blue); }
+.sub-hint { margin: 10px 0 0; font-size: 12px; color: var(--ink-48); letter-spacing: -0.01em; }
+
 /* ---------- Sticky control bar (frosted) ---------- */
 .controls {
   position: sticky; top: 44px; z-index: 20;

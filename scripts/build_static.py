@@ -1,18 +1,20 @@
 """Build a static snapshot of the dashboard for GitHub Pages.
 
 Scrapes all providers live, renders templates/index.html in static mode (no
-backend, no refresh button, data baked in), and writes a self-contained site to
-dist/. Used by .github/workflows/deploy.yml on a schedule.
+backend, no refresh button, data baked in), writes one subscribable .ics per
+state (plus all.ics), and puts the self-contained site in dist/. Used by
+.github/workflows/deploy.yml on a schedule.
 
 Run locally:  .venv/bin/python scripts/build_static.py
-Output:       dist/index.html  +  dist/static/*
+Output:       dist/index.html  +  dist/*.ics  +  dist/static/*
 """
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -20,9 +22,13 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE))
 
+from lib.ics import build_feeds, render_feed  # noqa: E402
 from lib.registry import PROVIDERS  # noqa: E402
 from lib.scrape import run_all  # noqa: E402
 from lib.store import Store  # noqa: E402
+
+# Where the built site lives — calendar subscriptions need absolute URLs.
+SITE_URL = os.environ.get("RIDEDAY_BASE_URL", "https://cyprien0312.github.io/rideday").rstrip("/")
 
 
 def _now_sydney() -> str:
@@ -56,6 +62,15 @@ def main() -> int:
         print("ERROR: 0 events across all providers — refusing to publish an empty page")
         return 1
 
+    # Calendar feeds: webcal:// so a click subscribes instead of downloading a copy.
+    feeds = build_feeds(events)
+    now = datetime.now(timezone.utc)
+    webcal_base = SITE_URL.split("://", 1)[-1]
+    for feed in feeds:
+        (dist / feed.filename).write_text(render_feed(feed, now=now), encoding="utf-8")
+    print(f"wrote {len(feeds)} calendar feeds: "
+          + ", ".join(f"{f.filename}({len(f.events)})" for f in feeds))
+
     env = Environment(
         loader=FileSystemLoader(str(BASE / "templates")),
         autoescape=select_autoescape(["html"]),
@@ -67,6 +82,8 @@ def main() -> int:
         asset_base="static",       # relative -> works under the /rideday/ Pages subpath
         static_mode=True,
         generated_at=_now_sydney(),
+        feeds=[{"slug": f.slug, "label": f.label, "count": len(f.events),
+                "href": f"webcal://{webcal_base}/{f.filename}"} for f in feeds],
     )
     (dist / "index.html").write_text(html, encoding="utf-8")
     shutil.copytree(BASE / "static", dist / "static")

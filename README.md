@@ -22,6 +22,36 @@
 
 本地实时版(带刷新按钮、可选任意刷新间隔)见下方「快速开始」——两种模式共用同一套 adapter。
 
+## 订阅到日历 (Apple Calendar / Google Calendar)
+
+每次发布同时生成一组 `.ics` 订阅源:**全量一个,每个州各一个**。在页面上点「订阅到日历」那排按钮即可,
+或直接用下面的 webcal 链接:
+
+| feed | 链接 |
+|---|---|
+| VIC | `webcal://cyprien0312.github.io/rideday/vic.ics` |
+| NSW | `webcal://cyprien0312.github.io/rideday/nsw.ics` |
+| QLD | `webcal://cyprien0312.github.io/rideday/qld.ics` |
+| SA | `webcal://cyprien0312.github.io/rideday/sa.ics` |
+| WA | `webcal://cyprien0312.github.io/rideday/wa.ics` |
+| 全部 | `webcal://cyprien0312.github.io/rideday/all.ics` |
+
+州的 feed 按当次抓到的数据动态生成——某个州这轮没有活动,就不会有那个文件。
+
+**Apple Calendar**:点 webcal 链接会直接弹出「订阅日历」;或「文件 → 新建日历订阅」粘贴上面的 https 版链接。
+建议把自动刷新设成「每天」。
+
+口径:
+
+- 每场是**全天事件**,不占用忙碌时间 (`TRANSP:TRANSPARENT`)。列表页的开始时间(如 PIRD 的 7:00am)
+  写在备注里——各站列表层给的时间不统一,不适合当精确的 DTSTART。
+- 已售罄的场次**保留**在日历里,标题标 `[售罄]`、快满标 `[快满]`,免得某天凭空消失。
+  不用 `STATUS:CANCELLED`,因为不少客户端会直接把它藏掉。
+- 事件 UID 用 `event_uid`,与页面去重键同源:重复刷新不会产生重复日历项。
+
+本地实时版同样提供 `GET /calendar/<州>.ics`(例:http://127.0.0.1:8765/calendar/vic.ics),
+主要用于测试和一次性导入——长期订阅还是用线上那份。
+
 ## 快速开始(本地实时版)
 
 ```bash
@@ -34,8 +64,10 @@ python3 -m venv .venv
 ## 构建静态版(与 Pages 同款)
 
 ```bash
-.venv/bin/python scripts/build_static.py   # 输出 dist/index.html + dist/static/
+.venv/bin/python scripts/build_static.py   # 输出 dist/index.html + dist/*.ics + dist/static/
 ```
+
+订阅链接里的域名来自 `RIDEDAY_BASE_URL`(默认 `https://cyprien0312.github.io/rideday`)。
 
 首次启动会在后台抓一次(几秒),抓完刷新页面即可看到数据。之后后台每 3 小时自动刷新。
 
@@ -78,8 +110,10 @@ python3 -m venv .venv
 ## 结构
 
 ```
-app.py                  FastAPI: GET / (看板), GET /api/events, POST /api/refresh, 后台调度
+app.py                  FastAPI: GET / (看板), GET /api/events, GET /calendar/<州>.ics,
+                        POST /api/refresh, 后台调度
 lib/models.py           Event dataclass + Status 枚举 + event_uid
+lib/ics.py              纯函数:events -> .ics 文本 + 按州分 feed(离线可测)
 lib/store.py            SQLite: upsert / upcoming 查询 / scrape_runs
 lib/providers/          base.py(ABC + 共享解析) + 每站一个 adapter
 lib/registry.py         已注册 provider 列表
