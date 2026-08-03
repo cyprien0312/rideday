@@ -25,7 +25,7 @@
 
 | # | 待办 | 备注 |
 |---|---|---|
-| 1 | 首次线上验证订阅链接 | push 后等一轮 Actions,用 Apple Calendar 实际订阅 `webcal://cyprien0312.github.io/rideday/vic.ics` 确认能拉到。**本地生成的 .ics 已用 `icalendar` 解析器验过,但真机订阅还没做。** |
+| 1 | 用 Apple Calendar 实际订阅一次 | 线上文件本身已验过(见下),**只剩在「日历」App 里真点一次 `webcal://cyprien0312.github.io/rideday/vic.ics`**,确认能加进去、事件显示正常。这步只能在你自己机器上做。 |
 | 2 | 决定要不要加 VALARM 提醒 | 现在订阅项没有任何提醒。加的话得决定提前多久,以及要不要只给「有票」的场次加 |
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
 
@@ -36,6 +36,9 @@
   `.venv/bin/python scripts/build_static.py` → `wrote 6 calendar feeds: all.ics(125), nsw.ics(18), qld.ics(24), sa.ics(42), vic.ics(33), wa.ics(8)`;
   6 份 .ics 全部通过 `icalendar` 库的严格 RFC 5545 解析,UID 无重复、DTEND > DTSTART、无超 75 octet 行。
   最终做的是**每州一个 + 全量**(用户选),不止 VIC。
+- ~~线上验证发布出来的 feed~~ —— 2026-08-03 关闭。凭据:Actions run 30788182849 success;
+  `curl -so /dev/null -w '%{http_code} %{content_type}' https://cyprien0312.github.io/rideday/vic.ics`
+  → `200 text/calendar`(**content-type 对是 webcal 能订阅的关键**);vic 33 / all 125 / nsw 18 个 VEVENT。
 
 ## 相关文件
 
