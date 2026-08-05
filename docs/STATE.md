@@ -1,6 +1,6 @@
 # STATE — rideday-radar
 
-> 真相源。开工先读这里:此刻是什么状态 + 还剩什么。
+> 短期记忆。开工先读这里:此刻是什么状态 + 还剩什么。
 > 长期结论进 `docs/notes/`,决策进 `docs/decisions.md`,过程进 `sessions/`。
 
 **最后更新:2026-08-03**

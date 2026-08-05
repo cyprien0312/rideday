@@ -60,7 +60,7 @@
 - 订阅链接的域名走 `RIDEDAY_BASE_URL`,默认硬编码 `https://cyprien0312.github.io/rideday`。
   换 repo 名 / 换域名要改这个环境变量,`scripts/build_static.py` 顶部。
 
-## 真相源 / 规格 / 计划
+## 短期记忆 / 规格 / 计划
 
 **开工先读 `docs/STATE.md`**(此刻状态 + 待办)。
 规格 `docs/superpowers/specs/2026-07-21-rideday-radar-design.md` · 计划 `docs/superpowers/plans/2026-07-21-rideday-radar.md`
