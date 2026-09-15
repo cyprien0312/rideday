@@ -47,25 +47,32 @@ def parse_forecast(location_key: str, json_text: str) -> list[DailyForecast]:
     missing = [f for f in DAILY_FIELDS if f not in daily]
     if missing:
         raise ValueError(f"forecast JSON missing daily fields: {missing}")
+    for name in ("time", *DAILY_FIELDS):
+        if not isinstance(daily[name], list):
+            raise ValueError(f"forecast JSON field is not a list: {name}")
     n = len(daily["time"])
-    ragged = [f for f in DAILY_FIELDS if len(daily[f]) != n]
+    ragged = [f"{name}={len(daily[name])} != time={n}" for name in DAILY_FIELDS
+              if len(daily[name]) != n]
     if ragged:
-        raise ValueError(f"forecast JSON arrays ragged: {ragged}")
+        raise ValueError(f"forecast JSON arrays ragged: {', '.join(ragged)}")
 
     rows = []
     for i, day_text in enumerate(daily["time"]):
-        code = daily["weather_code"][i]
-        prob = daily["precipitation_probability_max"][i]
-        rows.append(DailyForecast(
-            location_key=location_key,
-            day=date.fromisoformat(day_text),
-            code=int(code) if code is not None else None,
-            tmin=daily["temperature_2m_min"][i],
-            tmax=daily["temperature_2m_max"][i],
-            rain_mm=daily["precipitation_sum"][i],
-            rain_prob=int(prob) if prob is not None else None,
-            wind_kmh=daily["wind_speed_10m_max"][i],
-        ))
+        try:
+            code = daily["weather_code"][i]
+            prob = daily["precipitation_probability_max"][i]
+            rows.append(DailyForecast(
+                location_key=location_key,
+                day=date.fromisoformat(day_text),
+                code=int(code) if code is not None else None,
+                tmin=daily["temperature_2m_min"][i],
+                tmax=daily["temperature_2m_max"][i],
+                rain_mm=daily["precipitation_sum"][i],
+                rain_prob=int(prob) if prob is not None else None,
+                wind_kmh=daily["wind_speed_10m_max"][i],
+            ))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"forecast day {i} ({day_text!r}) malformed: {exc}") from exc
     return rows
 
 

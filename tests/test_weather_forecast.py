@@ -38,20 +38,41 @@ def test_parse_tolerates_nulls():
 def test_parse_rejects_missing_field():
     d = json.loads(FIXTURE)
     del d["daily"]["weather_code"]
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="weather_code"):
         parse_forecast("broadford", json.dumps(d))
 
 
 def test_parse_rejects_ragged_arrays():
     d = json.loads(FIXTURE)
     d["daily"]["wind_speed_10m_max"].pop()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="wind_speed_10m_max"):
         parse_forecast("broadford", json.dumps(d))
 
 
 def test_parse_rejects_non_json():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="not JSON"):
         parse_forecast("broadford", "<html>nope</html>")
+
+
+def test_parse_rejects_field_that_is_not_a_list():
+    d = json.loads(FIXTURE)
+    d["daily"]["weather_code"] = None
+    with pytest.raises(ValueError, match="weather_code"):
+        parse_forecast("broadford", json.dumps(d))
+
+
+def test_parse_rejects_null_in_time():
+    d = json.loads(FIXTURE)
+    d["daily"]["time"][0] = None
+    with pytest.raises(ValueError, match="day 0"):
+        parse_forecast("broadford", json.dumps(d))
+
+
+def test_parse_rejects_non_numeric_code_with_day_in_message():
+    d = json.loads(FIXTURE)
+    d["daily"]["weather_code"][2] = "x"
+    with pytest.raises(ValueError, match=r"day 2 \('2026-09-17'\)"):
+        parse_forecast("broadford", json.dumps(d))
 
 
 @pytest.mark.parametrize("code,emoji,desc", [
