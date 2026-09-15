@@ -79,10 +79,30 @@ def test_index_and_api_show_normal_tier_without_forecast(tmp_path, monkeypatch):
     assert "https://www.bom.gov.au/places/vic/broadford/forecast/" in html
     assert "月平均" in html
     assert "Open-Meteo" in html            # footer attribution
+    assert html.count("Open-Meteo") == 2   # LED strip + footer
+    assert "尚未抓取" in html               # no weather run recorded yet -> LED says so
 
     w = client.get("/api/events").json()[0]["weather"]
     assert w["tier"] == "normal" and w["bom_url"].endswith("/vic/broadford/forecast/")
     assert w["tmax"] is not None
+
+
+def test_api_weather_is_null_for_unknown_track(tmp_path, monkeypatch):
+    monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
+    application = appmod.create_app()
+    _seed(application)
+    application.state.store.upsert_events([Event(
+        provider="champions", provider_name="Champions Ride Days", title="Nowhere Circuit",
+        track="Nowhere Circuit", date_start=date.today() + timedelta(days=3),
+        price_display="$220", price_aud=220.0,
+        url="https://x/none", status=Status.OPEN)])
+    client = TestClient(application)
+
+    js = client.get("/api/events").json()
+    item = next(i for i in js if i["track"] == "Nowhere Circuit")
+    assert item["weather"] is None
+
+    assert 'class="wx-none"' in client.get("/").text
 
 
 def test_index_and_api_show_forecast_tier_when_row_exists(tmp_path, monkeypatch):
@@ -97,6 +117,7 @@ def test_index_and_api_show_forecast_tier_when_row_exists(tmp_path, monkeypatch)
     html = client.get("/").text
     assert "🌧 8–14° · 雨 70%" in html
     assert 'data-rain="70"' in html
+    assert 'class="wx-forecast"' in html
 
     w = client.get("/api/events").json()[0]["weather"]
     assert w["tier"] == "forecast" and w["rain_prob"] == 70 and w["desc"] == "雨"

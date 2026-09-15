@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import threading
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from lib.scrape import run_all
 from lib.store import Store
 from lib.weather.attach import weather_map
 from lib.weather.normals import load_normals
-from lib.weather.refresh import refresh_weather
+from lib.weather.refresh import RUN_KEY, refresh_weather
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
@@ -37,11 +38,7 @@ def _event_json(e) -> dict:
 
 
 def _weather_json(w) -> dict | None:
-    if w is None:
-        return None
-    return {"tier": w.tier, "tier_label": w.tier_label, "desc": w.desc,
-            "tmin": w.tmin, "tmax": w.tmax, "rain_prob": w.rain_prob,
-            "rain_mm": w.rain_mm, "wind_kmh": w.wind_kmh, "bom_url": w.bom_url}
+    return None if w is None else asdict(w)  # raw fields only; display strings are properties
 
 
 def create_app() -> FastAPI:
@@ -51,7 +48,7 @@ def create_app() -> FastAPI:
     app.state.store = store
 
     def do_refresh() -> bool:
-        """Scrape all providers once. Skips if a refresh is already running."""
+        """Scrape all providers, then refresh weather. Skips if a refresh is already running."""
         if not _refresh_lock.acquire(blocking=False):
             return False
         try:
@@ -72,7 +69,7 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(request, "index.html", {
             "events": events,
             "runs": store.latest_runs(),
-            "provider_names": {**{p.key: p.name for p in PROVIDERS}, "weather": "Open-Meteo"},
+            "provider_names": {**{p.key: p.name for p in PROVIDERS}, RUN_KEY: "Open-Meteo"},
             "weather": _weather(events),
             "asset_base": "/static",
             "static_mode": False,

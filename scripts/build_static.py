@@ -28,7 +28,7 @@ from lib.scrape import run_all  # noqa: E402
 from lib.store import Store  # noqa: E402
 from lib.weather.attach import weather_map  # noqa: E402
 from lib.weather.normals import load_normals  # noqa: E402
-from lib.weather.refresh import refresh_weather  # noqa: E402
+from lib.weather.refresh import RUN_KEY, refresh_weather  # noqa: E402
 
 # Where the built site lives — calendar subscriptions need absolute URLs.
 SITE_URL = os.environ.get("RIDEDAY_BASE_URL", "https://cyprien0312.github.io/rideday").rstrip("/")
@@ -64,7 +64,7 @@ def main() -> int:
     for key, r in provider_runs.items():
         if r:
             print(f"  {key:16} ok={r.ok} count={r.event_count} err={r.error}")
-    wr = runs.get("weather")
+    wr = runs.get(RUN_KEY)
     print(f"weather: ok={wr.ok if wr else None} locations={wr.event_count if wr else 0} "
           f"err={wr.error if wr else None}; {len(weather)} events have weather")
 
@@ -88,7 +88,7 @@ def main() -> int:
     html = env.get_template("index.html").render(
         events=events,
         runs=runs,
-        provider_names={**{p.key: p.name for p in PROVIDERS}, "weather": "Open-Meteo"},
+        provider_names={**{p.key: p.name for p in PROVIDERS}, RUN_KEY: "Open-Meteo"},
         weather=weather,
         asset_base="static",       # relative -> works under the /rideday/ Pages subpath
         static_mode=True,
