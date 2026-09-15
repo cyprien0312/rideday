@@ -24,7 +24,7 @@
 - **天气(2026-09-15 新增)**:每行一个天气格,三档 预报(≤7 天)/ 远期预报(8–15 天)/ N 月平均,
   点开是该赛道的 BOM 预报页。本轮 101 场全部有天气:forecast 4 / outlook 14 / normal 83。
   实现在 `lib/weather/`,口径见 README「天气」一节;**BOM 只做链接不解析**(见 CLAUDE.md)。
-  线上那份要等下一次 Actions 发布后才有天气列(本 session push 触发)。
+  线上已发布(Actions run 34938788380 success)。
 
 ## 待办
 
@@ -33,12 +33,14 @@
 | 1 | 用 Apple Calendar 实际订阅一次 | 线上文件本身已验过(见下),**只剩在「日历」App 里真点一次 `webcal://cyprien0312.github.io/rideday/vic.ics`**,确认能加进去、事件显示正常。这步只能在你自己机器上做。 |
 | 2 | 决定要不要加 VALARM 提醒 | 现在订阅项没有任何提醒。加的话得决定提前多久,以及要不要只给「有票」的场次加 |
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
-| 4 | 线上验证天气列 | push 后等 Actions 跑完,`curl -s https://cyprien0312.github.io/rideday/ \| grep -c 'class="wx-'` 应 > 0,页面顶部 LED 有「Open-Meteo · 8 地点」 |
 | 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
 | 6 | 天气 review 遗留小项(都不阻塞) | ① 本地版旧预报行没有「年龄」提示:Open-Meteo 连挂几天,几天前的行仍显示「预报」,`fetched_at` 存了但没读回;② 7/8 地点成功时 LED 只写「抓取失败」,不显示计数;③ `DailyForecast` 定义在 `forecast.py`,让 `lib.store` 传递依赖 requests,挪到 `lib/models.py` 可切断 |
 
 ### 已关闭
 
+- ~~线上验证天气列~~ —— 2026-09-15 关闭。凭据:push `9cf437a` 触发 Actions run 34938788380 → `success`;
+  `curl -s https://cyprien0312.github.io/rideday/ | tr -s '\n ' ' ' | grep -o 'Open-Meteo · [0-9]* 地点'` → `Open-Meteo · 8 地点`;
+  `grep -c 'class="wx-forecast\|class="wx-outlook\|class="wx-normal'` → `101`(= 事件数)。
 - ~~把 VIC 的活动变成 Apple Calendar 订阅~~ —— 2026-08-03 关闭。
   凭据:`.venv/bin/pytest -q` → `43 passed, 3 deselected`;
   `.venv/bin/python scripts/build_static.py` → `wrote 6 calendar feeds: all.ics(125), nsw.ics(18), qld.ics(24), sa.ics(42), vic.ics(33), wa.ics(8)`;
