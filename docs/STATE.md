@@ -35,6 +35,7 @@
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
 | 4 | 线上验证天气列 | push 后等 Actions 跑完,`curl -s https://cyprien0312.github.io/rideday/ \| grep -c 'class="wx-'` 应 > 0,页面顶部 LED 有「Open-Meteo · 8 地点」 |
 | 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
+| 6 | 天气 review 遗留小项(都不阻塞) | ① 本地版旧预报行没有「年龄」提示:Open-Meteo 连挂几天,几天前的行仍显示「预报」,`fetched_at` 存了但没读回;② 7/8 地点成功时 LED 只写「抓取失败」,不显示计数;③ `DailyForecast` 定义在 `forecast.py`,让 `lib.store` 传递依赖 requests,挪到 `lib/models.py` 可切断 |
 
 ### 已关闭
 
