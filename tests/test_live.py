@@ -15,3 +15,12 @@ def test_live_provider_returns_events(provider):
     assert len(events) >= 1, f"{provider.key} parsed 0 events — site may have changed"
     assert all(e.date_start and e.url for e in events)
     assert all(e.track for e in events)
+
+
+@pytest.mark.live
+def test_live_open_meteo_forecast():
+    from lib.weather.forecast import fetch_forecast
+    from lib.weather.locations import LOCATIONS
+    rows = fetch_forecast(LOCATIONS[0])
+    assert len(rows) == 16, "Open-Meteo no longer returns 16 days — check forecast_days"
+    assert rows[0].tmax is not None

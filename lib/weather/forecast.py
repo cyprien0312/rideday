@@ -11,6 +11,10 @@ import json
 from dataclasses import dataclass
 from datetime import date
 
+import requests
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+from lib.providers.base import UA
 from lib.weather.locations import TrackLocation
 
 DAILY_FIELDS = ("weather_code", "temperature_2m_max", "temperature_2m_min",
@@ -88,3 +92,22 @@ def describe(code: int | None) -> tuple[str, str]:
         if lo <= code <= hi:
             return emoji, desc
     return "", ""
+
+
+FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+FORECAST_DAYS = 16
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=8), reraise=True)
+def get_forecast_json(loc: TrackLocation) -> str:
+    resp = requests.get(FORECAST_URL, params={
+        "latitude": loc.lat, "longitude": loc.lon,
+        "daily": ",".join(DAILY_FIELDS),
+        "timezone": loc.tz, "forecast_days": FORECAST_DAYS,
+    }, headers={"User-Agent": UA}, timeout=20)
+    resp.raise_for_status()
+    return resp.text
+
+
+def fetch_forecast(loc: TrackLocation) -> list[DailyForecast]:
+    return parse_forecast(loc.key, get_forecast_json(loc))
