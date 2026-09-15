@@ -100,12 +100,13 @@ class Store:
                 r["error"], datetime.fromisoformat(r["finished_at"])) for r in rows}
 
     def upsert_forecasts(self, rows: list[DailyForecast]) -> None:
-        """Replace forecast rows; drops days before today so the table never grows."""
+        """Upsert forecast rows (other locations untouched); purge days before today."""
         now = datetime.now().isoformat(timespec="seconds")
+        today = date.today()
         with self._conn() as c:
-            c.execute("DELETE FROM forecasts WHERE day < ?", (date.today().isoformat(),))
+            c.execute("DELETE FROM forecasts WHERE day < ?", (today.isoformat(),))
             for r in rows:
-                if r.day < date.today():
+                if r.day < today:
                     continue
                 c.execute("""
                   INSERT INTO forecasts (location_key, day, code, tmin, tmax, rain_mm,

@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from lib.models import Event, Status
 from lib.store import Store
+from lib.weather.forecast import DailyForecast
 
 
 def _ev(uid_url, d, price=200.0, provider="champions"):
@@ -41,7 +42,6 @@ def test_record_and_latest_runs(tmp_path):
 
 
 def _fc(key, d, tmax=20.0, prob=10):
-    from lib.weather.forecast import DailyForecast
     return DailyForecast(location_key=key, day=d, code=3, tmin=5.0, tmax=tmax,
                          rain_mm=0.0, rain_prob=prob, wind_kmh=15.0)
 
@@ -64,7 +64,6 @@ def test_forecasts_upsert_read_and_purge_past(tmp_path):
 
 
 def test_forecasts_none_values_roundtrip(tmp_path):
-    from lib.weather.forecast import DailyForecast
     s = Store(tmp_path / "t.db")
     d = date.today()
     s.upsert_forecasts([DailyForecast("collie", d, None, None, None, None, None, None)])

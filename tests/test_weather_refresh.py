@@ -37,3 +37,22 @@ def test_refresh_empty_result_counts_as_failure(tmp_path):
     refresh_weather(s, locations=[BY_KEY["broadford"]], fetch=lambda loc: [])
     run = s.latest_runs()["weather"]
     assert run.ok is False and "0 days" in run.error
+
+
+def test_failed_location_keeps_previous_rows(tmp_path):
+    s = Store(tmp_path / "t.db")
+    locs = [BY_KEY["broadford"], BY_KEY["smsp"]]
+    good = lambda loc: [DailyForecast(loc.key, date.today(), 3, 5.0, 20.0, 0.0, 10, 15.0)]
+    refresh_weather(s, locations=locs, fetch=good)
+    before = s.forecasts()[("smsp", date.today())]
+
+    def smsp_down(loc):
+        if loc.key == "smsp":
+            raise RuntimeError("down")
+        return [DailyForecast(loc.key, date.today(), 3, 6.0, 21.0, 0.0, 20, 16.0)]
+
+    refresh_weather(s, locations=locs, fetch=smsp_down)
+    after = s.forecasts()
+    assert after[("smsp", date.today())] == before          # kept
+    assert after[("broadford", date.today())].tmax == 21.0  # updated
+    assert s.latest_runs()["weather"].ok is False
