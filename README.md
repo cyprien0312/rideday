@@ -52,6 +52,27 @@
 本地实时版同样提供 `GET /calendar/<州>.ics`(例:http://127.0.0.1:8765/calendar/vic.ics),
 主要用于测试和一次性导入——长期订阅还是用线上那份。
 
+## 天气
+
+每行一个天气格,点开是该赛道的 **BOM 官方预报页**。数字分三档,格子下方的小字标明是哪档:
+
+| 档 | 含义 | 来源 |
+|---|---|---|
+| 预报 | 7 天内 | Open-Meteo(CC BY 4.0) |
+| 远期预报 | 8–15 天,准确度低,灰字 | Open-Meteo |
+| N 月平均 | 该赛道该月 2016–2025 十年平均:高/低温、雨天比例(日雨量 ≥ 1 mm),灰字 | Open-Meteo ERA5,算好存在 `lib/weather/normals.json` |
+
+hover 有风速和雨量。表头「天气」可按降雨概率排序,挑干的周末。多日活动只看首日。
+某地点 Open-Meteo 抓失败时该赛道退到月平均,顶部 LED 标红,活动列表不受影响。
+
+`/api/events` 每条多一个 `weather` 对象(`tier` / `tmin` / `tmax` / `rain_prob` / `rain_mm` / `wind_kmh` / `bom_url` …),没匹配到赛道时为 `null`。
+
+重算历史同期(基本不用跑,加赛道时才要):
+
+```bash
+.venv/bin/python scripts/build_climate_normals.py
+```
+
 ## 快速开始(本地实时版)
 
 ```bash
@@ -118,6 +139,8 @@ lib/store.py            SQLite: upsert / upcoming 查询 / scrape_runs
 lib/providers/          base.py(ABC + 共享解析) + 每站一个 adapter
 lib/registry.py         已注册 provider 列表
 lib/scrape.py           run_all():轮询所有 adapter,每站独立容错
+lib/weather/            locations.py 赛道→坐标/BOM 链接 · forecast.py 预报纯解析 · normals.py 历史同期
+                        · attach.py 三档匹配 · refresh.py 逐地点抓取(失败隔离)
 templates/ static/      看板页面 + 前端排序/过滤 JS
 tests/                  fixture + 单测 + 联网 smoke
 ```

@@ -20,6 +20,12 @@
   全天事件 (`VALUE=DATE`,`DTEND` 排他要 +1 天),不碰时区。售罄的**保留**并在 SUMMARY 标 `[售罄]`,
   **不要**用 `STATUS:CANCELLED`——客户端会把事件藏掉。UID 复用 `event_uid`,订阅刷新才不会重复。
   写 .ics 属性一律走 `_escape` + `_fold`(75 octet 折行,别切断 UTF-8 字符)。
+- **天气 `lib/weather/`**:`parse_forecast(json)`、`compute_normals(rows)`、`weather_for(...)` 都是纯函数,
+  fixture 在 `tests/fixtures/openmeteo_*.json`。Open-Meteo 的 JSON 信封校验统一走 `_openmeteo.daily_arrays`
+  (stdlib-only,`normals.py` 不能间接依赖 `requests`)。`refresh_weather(store)` **独立于 `run_all`**,
+  逐地点隔离失败,记 `scrape_runs("weather")`。三档:`forecast`(≤7 天)/ `outlook`(8–15 天)/
+  `normal`(月平均,来自已提交的 `normals.json`)。**BOM 只做链接,不解析**——它的 JSON API 明禁使用,
+  HTML 页只给 7 天。加赛道 = `locations.LOCATIONS` 加一行 + 重跑 `scripts/build_climate_normals.py`。
 
 ## TDD
 
@@ -33,6 +39,9 @@
   标题含字面 `**markdown**` 需清洗)。
 - **PIRD / SMSP**:`.event` 行;`.date h4` 日期、`.detail h3` 价格(`From $X` 取下限)、`.detail p` 时间、
   `.status button[data-id]` 状态+id。赛道/州为常量。
+- **Open-Meteo**(`/v1/forecast`,`forecast_days=16`,`timezone=<赛道当地>`):`daily.time` + 六个等长数组
+  `weather_code / temperature_2m_max / temperature_2m_min / precipitation_sum / precipitation_probability_max /
+  wind_speed_10m_max`。缺字段、非 list、长度不齐、`time` 里有 null 一律 `ValueError`,`null` 值按字段容忍。
 
 ## Git
 
@@ -50,10 +59,16 @@
 - **订阅是全量替换**:某场从官网下架后,下次抓取它就不在 feed 里,已订阅日历里那条会消失。
   ics 里没有历史,也没法发 `METHOD:CANCEL`(那是邀请流,不是订阅流)。
 - **PIRD/SMSP 没有 per-event URL**,订票是 JS 弹窗。日历项的 URL 只能指到列表页的 `#data-id` 锚点。
+- **16 天外没有任何源能给预报**,所以远期场次只显示十年同期平均(ERA5)。Open-Meteo 的 16 天已是上限,
+  BOM 只有 7 天。→ 重估条件:出现可免费用的、覆盖澳洲的更长期预报源。
 
 **只是没做**(don't assume it exists):
 
 - 日历项**没有 VALARM 提醒**。
+- 天气**没进 .ics**,只在看板。多日活动只看首日;没有小时级;`rain_prob` 在预报档是降雨概率、
+  在月平均档是雨天比例,排序把两者混排。
+- Open-Meteo 抓取**没有数量骤降报警**(同站点改版那条);`normals.json` 的年份区间写死在
+  `attach.py` 的 hover 文案里,重跑脚本换区间要手动同步。
 - **没有 VTIMEZONE 块** —— 全天事件不需要;哪天改成定时事件必须补上。
 - **没有 per-provider 的 feed**(只按州分)。
 - 站点改版只有「抓 0 条 = 失败」这一层,**数量骤降不报警**。

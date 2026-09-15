@@ -3,23 +3,28 @@
 > 短期记忆。开工先读这里:此刻是什么状态 + 还剩什么。
 > 长期结论进 `docs/notes/`,决策进 `docs/decisions.md`,过程进 `sessions/`。
 
-**最后更新:2026-08-03**
+**最后更新:2026-09-15**
 
 ## 此刻状态
 
-三个 provider 全绿,离线单测 43 条 + 联网 smoke 3 条全过。
+三个 provider + 天气全绿,离线单测 114 条 + 联网 smoke 4 条全过。
 
 | provider | 状态 | 本轮抓到 |
 |---|---|---|
-| `champions` | ok | 91 |
-| `phillip_island` (PIRD) | ok | 16 |
-| `smsp` | ok | 18 |
+| `champions` | ok | 67 |
+| `phillip_island` (PIRD) | ok | 15 |
+| `smsp` | ok | 19 |
+| `weather` (Open-Meteo) | ok | 8 地点 |
 
 - 线上:https://cyprien0312.github.io/rideday/ ,GitHub Actions 每 6 小时 + 每次 push 重建并发布。
 - 本地实时版:`./scripts/run.sh` → http://127.0.0.1:8765
 - **日历订阅(2026-08-03 新增)**:每次发布同时生成 `all.ics` + 每个州一个 `.ics`。
   本轮:all(125) / nsw(18) / qld(24) / sa(42) / vic(33) / wa(8)。
   实现在 `lib/ics.py`(纯函数,离线可测),口径见 README「订阅到日历」一节。
+- **天气(2026-09-15 新增)**:每行一个天气格,三档 预报(≤7 天)/ 远期预报(8–15 天)/ N 月平均,
+  点开是该赛道的 BOM 预报页。本轮 101 场全部有天气:forecast 4 / outlook 14 / normal 83。
+  实现在 `lib/weather/`,口径见 README「天气」一节;**BOM 只做链接不解析**(见 CLAUDE.md)。
+  线上那份要等下一次 Actions 发布后才有天气列(本 session push 触发)。
 
 ## 待办
 
@@ -28,6 +33,8 @@
 | 1 | 用 Apple Calendar 实际订阅一次 | 线上文件本身已验过(见下),**只剩在「日历」App 里真点一次 `webcal://cyprien0312.github.io/rideday/vic.ics`**,确认能加进去、事件显示正常。这步只能在你自己机器上做。 |
 | 2 | 决定要不要加 VALARM 提醒 | 现在订阅项没有任何提醒。加的话得决定提前多久,以及要不要只给「有票」的场次加 |
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
+| 4 | 线上验证天气列 | push 后等 Actions 跑完,`curl -s https://cyprien0312.github.io/rideday/ \| grep -c 'class="wx-'` 应 > 0,页面顶部 LED 有「Open-Meteo · 8 地点」 |
+| 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
 
 ### 已关闭
 
@@ -44,4 +51,7 @@
 
 - 规格:`docs/superpowers/specs/2026-07-21-rideday-radar-design.md`
 - 计划:`docs/superpowers/plans/2026-07-21-rideday-radar.md`
+- 天气规格:`docs/superpowers/specs/2026-09-15-weather-design.md`
+- 天气计划:`docs/superpowers/plans/2026-09-15-weather.md`
+- 天气过程:`sessions/2026-09-15-weather/notes.md`
 - 约定与坑:`CLAUDE.md`
