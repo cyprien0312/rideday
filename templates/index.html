@@ -24,7 +24,7 @@
       {% set r = runs.get(key) %}
       <span class="run {{ 'ok' if r and r.ok else ('bad' if r else 'none') }}">
         <i class="runled"></i>{{ name }}
-        {% if r and r.ok %}· {{ r.event_count }} 场 · {{ r.finished_at.strftime('%m-%d %H:%M') }}
+        {% if r and r.ok %}· {{ r.event_count }} {{ '地点' if key == 'weather' else '场' }} · {{ r.finished_at.strftime('%m-%d %H:%M') }}
         {% elif r %}· 抓取失败{% else %}· 尚未抓取{% endif %}
       </span>
     {% endfor %}
@@ -72,6 +72,7 @@
             <th data-sort="date">日期</th>
             <th data-sort="track">赛道</th>
             <th data-sort="state">州</th>
+            <th data-sort="rain">天气</th>
             <th data-sort="price" class="num">价格</th>
             <th>卖票情况</th>
             <th class="link-col">链接</th>
@@ -79,15 +80,25 @@
         </thead>
         <tbody>
           {% for e in events %}
+          {% set w = weather.get(e.event_uid) %}
           <tr data-date="{{ e.date_start.isoformat() }}" data-track="{{ e.track|lower }}"
               data-state="{{ e.state or '' }}" data-price="{{ e.price_aud or 0 }}"
-              data-status="{{ e.status.value }}">
+              data-status="{{ e.status.value }}"
+              data-rain="{{ w.rain_prob if w and w.rain_prob is not none else -1 }}">
             <td class="date">
               <span class="d-main">{{ e.date_start.strftime('%a %d %b') }}{% if e.date_end %} – {{ e.date_end.strftime('%d %b') }}{% endif %}</span>
               {% if e.start_time %}<small>{{ e.start_time }}</small>{% endif %}
             </td>
             <td class="track"><span class="t-main">{{ e.track }}</span><small>{{ e.provider_name }}</small></td>
             <td class="state">{{ e.state or '—' }}</td>
+            <td class="wx">
+              {% if w %}
+              <a class="wx-{{ w.tier }}" href="{{ w.bom_url }}" target="_blank" rel="noopener" title="{{ w.hover }}">
+                <span class="wx-main">{% if w.emoji %}{{ w.emoji }} {% endif %}{{ w.temp_text }} · {{ w.rain_text }}</span>
+                <small>{{ w.tier_label }}</small>
+              </a>
+              {% else %}<span class="wx-none">—</span>{% endif %}
+            </td>
             <td class="num">{{ e.price_display or '—' }}</td>
             <td><span class="st st-{{ e.status.value }}">{{ e.status_raw or e.status.value }}</span></td>
             <td class="link-col"><a href="{{ e.url }}" target="_blank" rel="noopener">订票<span class="arr"> ↗</span></a></td>
@@ -104,6 +115,7 @@
 
 <footer>
   <p>数据来自各官网、仅供参考,以官网为准。每行链接直达官方订票页。</p>
+  <p>天气:16 天内是 <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> 预报(CC BY 4.0),更远的是十年同期平均;点天气格看 BOM 官方预报。</p>
   <p class="legal">
     {% if static_mode %}由 GitHub Actions 每 6 小时自动抓取并重新发布{% else %}后台每 3 小时自动刷新{% endif %}
     · rideday-radar

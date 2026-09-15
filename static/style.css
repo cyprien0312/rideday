@@ -268,6 +268,14 @@ td.link-col a { font-weight: 400; transition: transform 0.12s ease; display: inl
 td.link-col a:active { transform: scale(0.96); }
 td.link-col .arr { color: var(--blue); }
 
+td.wx { white-space: nowrap; }
+td.wx a { color: inherit; display: inline-block; }
+td.wx a:hover .wx-main { color: var(--blue); }
+td.wx .wx-main { font-variant-numeric: tabular-nums; }
+td.wx small { display: block; font-size: 12px; color: var(--ink-48); margin-top: 2px; letter-spacing: -0.008em; }
+td.wx .wx-outlook .wx-main, td.wx .wx-normal .wx-main { color: var(--ink-muted); }
+td.wx .wx-none { color: var(--ink-48); }
+
 .empty { text-align: center; color: var(--ink-muted); padding: 56px 24px; font-size: 17px; }
 
 /* ---------- Footer ---------- */

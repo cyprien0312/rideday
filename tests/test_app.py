@@ -49,17 +49,54 @@ def test_index_links_the_calendar_feeds(tmp_path, monkeypatch):
     assert "/calendar/all.ics" in TestClient(application).get("/").text
 
 
-def test_refresh_endpoint_runs_providers(tmp_path, monkeypatch):
+def test_refresh_endpoint_runs_providers_and_weather(tmp_path, monkeypatch):
     monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
     application = appmod.create_app()
 
-    calls = {"n": 0}
+    calls = {"providers": 0, "weather": 0}
 
     def fake_run_all(store, providers=None):
-        calls["n"] += 1
+        calls["providers"] += 1
+
+    def fake_refresh_weather(store):
+        calls["weather"] += 1
 
     monkeypatch.setattr(appmod, "run_all", fake_run_all)
+    monkeypatch.setattr(appmod, "refresh_weather", fake_refresh_weather)
     client = TestClient(application)
     resp = client.post("/api/refresh")
     assert resp.status_code == 200
-    assert calls["n"] == 1
+    assert calls == {"providers": 1, "weather": 1}
+
+
+def test_index_and_api_show_normal_tier_without_forecast(tmp_path, monkeypatch):
+    monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
+    application = appmod.create_app()
+    _seed(application)
+    client = TestClient(application)
+
+    html = client.get("/").text
+    assert "https://www.bom.gov.au/places/vic/broadford/forecast/" in html
+    assert "月平均" in html
+    assert "Open-Meteo" in html            # footer attribution
+
+    w = client.get("/api/events").json()[0]["weather"]
+    assert w["tier"] == "normal" and w["bom_url"].endswith("/vic/broadford/forecast/")
+    assert w["tmax"] is not None
+
+
+def test_index_and_api_show_forecast_tier_when_row_exists(tmp_path, monkeypatch):
+    from lib.weather.forecast import DailyForecast
+    monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
+    application = appmod.create_app()
+    _seed(application)
+    d = date.today() + timedelta(days=2)
+    application.state.store.upsert_forecasts([DailyForecast("broadford", d, 61, 8.0, 14.0, 6.5, 70, 30.0)])
+    client = TestClient(application)
+
+    html = client.get("/").text
+    assert "🌧 8–14° · 雨 70%" in html
+    assert 'data-rain="70"' in html
+
+    w = client.get("/api/events").json()[0]["weather"]
+    assert w["tier"] == "forecast" and w["rain_prob"] == 70 and w["desc"] == "雨"

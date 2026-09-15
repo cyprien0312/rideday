@@ -38,6 +38,7 @@ headers.forEach((th) =>
     asc[key] = !asc[key];
     const val = (r) =>
       key === "price" ? parseFloat(r.dataset.price)
+      : key === "rain" ? parseFloat(r.dataset.rain)
       : key === "date" ? r.dataset.date
       : r.dataset[key];
     rows()

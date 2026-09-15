@@ -26,6 +26,9 @@ from lib.ics import build_feeds, render_feed  # noqa: E402
 from lib.registry import PROVIDERS  # noqa: E402
 from lib.scrape import run_all  # noqa: E402
 from lib.store import Store  # noqa: E402
+from lib.weather.attach import weather_map  # noqa: E402
+from lib.weather.normals import load_normals  # noqa: E402
+from lib.weather.refresh import refresh_weather  # noqa: E402
 
 # Where the built site lives — calendar subscriptions need absolute URLs.
 SITE_URL = os.environ.get("RIDEDAY_BASE_URL", "https://cyprien0312.github.io/rideday").rstrip("/")
@@ -50,13 +53,20 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         store = Store(Path(tmp) / "build.db")
         run_all(store, providers=PROVIDERS)
+        refresh_weather(store)
         events = store.upcoming_events()
         runs = store.latest_runs()
+        weather = weather_map(events, store.forecasts(), load_normals())
 
-    ok = sum(1 for r in runs.values() if r.ok)
+    provider_runs = {p.key: runs.get(p.key) for p in PROVIDERS}
+    ok = sum(1 for r in provider_runs.values() if r and r.ok)
     print(f"scraped: {ok}/{len(PROVIDERS)} providers ok, {len(events)} upcoming events")
-    for key, r in runs.items():
-        print(f"  {key:16} ok={r.ok} count={r.event_count} err={r.error}")
+    for key, r in provider_runs.items():
+        if r:
+            print(f"  {key:16} ok={r.ok} count={r.event_count} err={r.error}")
+    wr = runs.get("weather")
+    print(f"weather: ok={wr.ok if wr else None} locations={wr.event_count if wr else 0} "
+          f"err={wr.error if wr else None}; {len(weather)} events have weather")
 
     if not events:  # nothing to publish -> fail the build, keep the old Pages copy
         print("ERROR: 0 events across all providers — refusing to publish an empty page")
@@ -78,7 +88,8 @@ def main() -> int:
     html = env.get_template("index.html").render(
         events=events,
         runs=runs,
-        provider_names={p.key: p.name for p in PROVIDERS},
+        provider_names={**{p.key: p.name for p in PROVIDERS}, "weather": "Open-Meteo"},
+        weather=weather,
         asset_base="static",       # relative -> works under the /rideday/ Pages subpath
         static_mode=True,
         generated_at=_now_sydney(),

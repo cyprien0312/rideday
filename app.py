@@ -16,6 +16,9 @@ from lib.ics import build_feeds, render_feed
 from lib.registry import PROVIDERS
 from lib.scrape import run_all
 from lib.store import Store
+from lib.weather.attach import weather_map
+from lib.weather.normals import load_normals
+from lib.weather.refresh import refresh_weather
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
@@ -33,6 +36,14 @@ def _event_json(e) -> dict:
     }
 
 
+def _weather_json(w) -> dict | None:
+    if w is None:
+        return None
+    return {"tier": w.tier, "tier_label": w.tier_label, "desc": w.desc,
+            "tmin": w.tmin, "tmax": w.tmax, "rain_prob": w.rain_prob,
+            "rain_mm": w.rain_mm, "wind_kmh": w.wind_kmh, "bom_url": w.bom_url}
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="rideday-radar")
     app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
@@ -45,11 +56,15 @@ def create_app() -> FastAPI:
             return False
         try:
             run_all(store, providers=PROVIDERS)
+            refresh_weather(store)
             return True
         finally:
             _refresh_lock.release()
 
     app.state.do_refresh = do_refresh
+
+    def _weather(events):
+        return weather_map(events, store.forecasts(), load_normals())
 
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request):
@@ -57,7 +72,8 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(request, "index.html", {
             "events": events,
             "runs": store.latest_runs(),
-            "provider_names": {p.key: p.name for p in PROVIDERS},
+            "provider_names": {**{p.key: p.name for p in PROVIDERS}, "weather": "Open-Meteo"},
+            "weather": _weather(events),
             "asset_base": "/static",
             "static_mode": False,
             "feeds": [{"slug": f.slug, "label": f.label, "count": len(f.events),
@@ -66,7 +82,10 @@ def create_app() -> FastAPI:
 
     @app.get("/api/events")
     def api_events():
-        return JSONResponse([_event_json(e) for e in store.upcoming_events()])
+        events = store.upcoming_events()
+        weather = _weather(events)
+        return JSONResponse([{**_event_json(e), "weather": _weather_json(weather.get(e.event_uid))}
+                             for e in events])
 
     @app.api_route("/calendar/{slug}.ics", methods=["GET", "HEAD"])
     def calendar(slug: str):
