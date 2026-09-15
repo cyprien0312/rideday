@@ -57,3 +57,15 @@ def test_load_normals_roundtrip(tmp_path):
     n = load_normals(p)
     assert "_meta" not in n
     assert n["broadford"][9] == Normal(tmax=15.2, tmin=4.1, rain_days_pct=42)
+
+
+def test_shipped_normals_cover_all_locations_and_months():
+    from lib.weather.locations import LOCATIONS
+    n = load_normals()
+    assert set(n) == {l.key for l in LOCATIONS}
+    for key, months in n.items():
+        assert set(months) == set(range(1, 13)), key
+        for m, v in months.items():
+            assert v.tmax is not None and v.tmin is not None and v.rain_days_pct is not None, (key, m)
+            assert -10 < v.tmin < v.tmax < 50, (key, m)
+            assert 0 <= v.rain_days_pct <= 100, (key, m)
