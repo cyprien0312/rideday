@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 from lib.models import Event, Status
+from lib.weather.forecast import DailyForecast
 
 
 @dataclass
@@ -27,6 +28,11 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE TABLE IF NOT EXISTS scrape_runs (
   id INTEGER PRIMARY KEY AUTOINCREMENT, provider TEXT, started_at TEXT,
   finished_at TEXT, ok INTEGER, event_count INTEGER, error TEXT
+);
+CREATE TABLE IF NOT EXISTS forecasts (
+  location_key TEXT, day TEXT, code INTEGER, tmin REAL, tmax REAL,
+  rain_mm REAL, rain_prob INTEGER, wind_kmh REAL, fetched_at TEXT,
+  PRIMARY KEY (location_key, day)
 );
 """
 
@@ -92,6 +98,37 @@ class Store:
               ON r.id=x.mid""").fetchall()
         return {r["provider"]: RunInfo(r["provider"], bool(r["ok"]), r["event_count"],
                 r["error"], datetime.fromisoformat(r["finished_at"])) for r in rows}
+
+    def upsert_forecasts(self, rows: list[DailyForecast]) -> None:
+        """Replace forecast rows; drops days before today so the table never grows."""
+        now = datetime.now().isoformat(timespec="seconds")
+        with self._conn() as c:
+            c.execute("DELETE FROM forecasts WHERE day < ?", (date.today().isoformat(),))
+            for r in rows:
+                if r.day < date.today():
+                    continue
+                c.execute("""
+                  INSERT INTO forecasts (location_key, day, code, tmin, tmax, rain_mm,
+                    rain_prob, wind_kmh, fetched_at)
+                  VALUES (?,?,?,?,?,?,?,?,?)
+                  ON CONFLICT(location_key, day) DO UPDATE SET
+                    code=excluded.code, tmin=excluded.tmin, tmax=excluded.tmax,
+                    rain_mm=excluded.rain_mm, rain_prob=excluded.rain_prob,
+                    wind_kmh=excluded.wind_kmh, fetched_at=excluded.fetched_at
+                """, (r.location_key, r.day.isoformat(), r.code, r.tmin, r.tmax,
+                      r.rain_mm, r.rain_prob, r.wind_kmh, now))
+
+    def forecasts(self) -> dict[tuple[str, date], DailyForecast]:
+        with self._conn() as c:
+            rows = c.execute("SELECT * FROM forecasts").fetchall()
+        out = {}
+        for r in rows:
+            d = date.fromisoformat(r["day"])
+            out[(r["location_key"], d)] = DailyForecast(
+                location_key=r["location_key"], day=d, code=r["code"],
+                tmin=r["tmin"], tmax=r["tmax"], rain_mm=r["rain_mm"],
+                rain_prob=r["rain_prob"], wind_kmh=r["wind_kmh"])
+        return out
 
     @staticmethod
     def _row_to_event(r) -> Event:
