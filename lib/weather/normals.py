@@ -14,6 +14,8 @@ from datetime import date
 from pathlib import Path
 from statistics import mean
 
+from lib.weather._openmeteo import daily_arrays
+
 NORMALS_PATH = Path(__file__).with_name("normals.json")
 RAIN_DAY_MM = 1.0          # a day with >= 1 mm counts as a rain day
 ARCHIVE_FIELDS = ("temperature_2m_max", "temperature_2m_min", "precipitation_sum")
@@ -30,24 +32,17 @@ class Normal:
 
 def parse_archive(json_text: str) -> list[DailyRow]:
     """Pure: Open-Meteo /v1/archive JSON -> (day, tmax, tmin, precip) rows."""
-    try:
-        data = json.loads(json_text)
-    except (TypeError, ValueError) as exc:
-        raise ValueError(f"archive is not JSON: {exc}") from exc
-    daily = data.get("daily") if isinstance(data, dict) else None
-    if not isinstance(daily, dict) or "time" not in daily:
-        raise ValueError("archive JSON has no daily.time")
-    missing = [f for f in ARCHIVE_FIELDS if f not in daily]
-    if missing:
-        raise ValueError(f"archive JSON missing daily fields: {missing}")
-    n = len(daily["time"])
-    ragged = [f for f in ARCHIVE_FIELDS if len(daily[f]) != n]
-    if ragged:
-        raise ValueError(f"archive JSON arrays ragged: {ragged}")
-    return [(date.fromisoformat(daily["time"][i]),
-             daily["temperature_2m_max"][i],
-             daily["temperature_2m_min"][i],
-             daily["precipitation_sum"][i]) for i in range(n)]
+    daily = daily_arrays(json_text, ARCHIVE_FIELDS, "archive")
+    rows = []
+    for i, day_text in enumerate(daily["time"]):
+        try:
+            rows.append((date.fromisoformat(day_text),
+                         daily["temperature_2m_max"][i],
+                         daily["temperature_2m_min"][i],
+                         daily["precipitation_sum"][i]))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"archive day {i} ({day_text!r}) malformed: {exc}") from exc
+    return rows
 
 
 def compute_normals(rows: list[DailyRow]) -> dict[int, Normal]:
@@ -74,7 +69,10 @@ def compute_normals(rows: list[DailyRow]) -> dict[int, Normal]:
 
 
 def load_normals(path: Path = NORMALS_PATH) -> dict[str, dict[int, Normal]]:
-    """{location_key: {month: Normal}}. Missing file -> {} (weather is optional)."""
+    """{location_key: {month: Normal}}. Missing file -> {} (weather is optional).
+    A malformed file raises on purpose: the shipped file is committed and
+    guarded by test_shipped_normals_cover_all_locations_and_months, so a bad
+    file here is a bug to fix, not something to swallow silently."""
     if not path.exists():
         return {}
     data = json.loads(path.read_text(encoding="utf-8"))

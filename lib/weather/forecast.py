@@ -7,7 +7,6 @@ dates because we pass `timezone=<location tz>`.
 """
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from datetime import date
 
@@ -15,6 +14,7 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from lib.providers.base import UA
+from lib.weather._openmeteo import daily_arrays
 from lib.weather.locations import TrackLocation
 
 DAILY_FIELDS = ("weather_code", "temperature_2m_max", "temperature_2m_min",
@@ -37,24 +37,7 @@ class DailyForecast:
 def parse_forecast(location_key: str, json_text: str) -> list[DailyForecast]:
     """Pure: Open-Meteo /v1/forecast JSON -> one row per day. Raises ValueError
     if the shape is off (treated as an API change by the caller)."""
-    try:
-        data = json.loads(json_text)
-    except (TypeError, ValueError) as exc:
-        raise ValueError(f"forecast is not JSON: {exc}") from exc
-    daily = data.get("daily") if isinstance(data, dict) else None
-    if not isinstance(daily, dict) or "time" not in daily:
-        raise ValueError("forecast JSON has no daily.time")
-    missing = [f for f in DAILY_FIELDS if f not in daily]
-    if missing:
-        raise ValueError(f"forecast JSON missing daily fields: {missing}")
-    for name in ("time", *DAILY_FIELDS):
-        if not isinstance(daily[name], list):
-            raise ValueError(f"forecast JSON field is not a list: {name}")
-    n = len(daily["time"])
-    ragged = [f"{name}={len(daily[name])} != time={n}" for name in DAILY_FIELDS
-              if len(daily[name]) != n]
-    if ragged:
-        raise ValueError(f"forecast JSON arrays ragged: {', '.join(ragged)}")
+    daily = daily_arrays(json_text, DAILY_FIELDS, "forecast")
 
     rows = []
     for i, day_text in enumerate(daily["time"]):

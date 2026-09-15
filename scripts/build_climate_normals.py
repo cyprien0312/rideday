@@ -21,8 +21,8 @@ sys.path.insert(0, str(BASE))
 
 from lib.providers.base import UA  # noqa: E402
 from lib.weather.locations import LOCATIONS  # noqa: E402
-from lib.weather.normals import (ARCHIVE_FIELDS, NORMALS_PATH, compute_normals,  # noqa: E402
-                                 parse_archive)
+from lib.weather.normals import (ARCHIVE_FIELDS, NORMALS_PATH, RAIN_DAY_MM,  # noqa: E402
+                                 compute_normals, parse_archive)
 
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 START, END = "2016-01-01", "2025-12-31"
@@ -32,7 +32,7 @@ def main() -> int:
     out: dict = {"_meta": {
         "source": "Open-Meteo ERA5 archive (CC BY 4.0)",
         "period": f"{START}/{END}",
-        "rain_day_threshold_mm": 1.0,
+        "rain_day_threshold_mm": RAIN_DAY_MM,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
     }}
     for loc in LOCATIONS:

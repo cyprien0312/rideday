@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from lib.weather.normals import Normal, compute_normals, load_normals, parse_archive
+from lib.weather.normals import NORMALS_PATH, Normal, compute_normals, load_normals, parse_archive
 
 
 def _days(start, n, tmax, tmin, precip):
@@ -40,8 +40,24 @@ def test_parse_archive_rows():
 
 
 def test_parse_archive_rejects_missing_field():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="temperature_2m_max"):
         parse_archive(json.dumps({"daily": {"time": ["2025-09-01"]}}))
+
+
+def test_parse_archive_rejects_ragged_arrays():
+    js = json.dumps({"daily": {"time": ["2025-09-01", "2025-09-02"],
+                               "temperature_2m_max": [12.3],
+                               "temperature_2m_min": [3.0, 3.7],
+                               "precipitation_sum": [0.4, 4.2]}})
+    with pytest.raises(ValueError, match="archive.*temperature_2m_max=1 != time=2"):
+        parse_archive(js)
+
+
+def test_parse_archive_rejects_null_in_time():
+    js = json.dumps({"daily": {"time": [None], "temperature_2m_max": [1.0],
+                               "temperature_2m_min": [0.0], "precipitation_sum": [0.0]}})
+    with pytest.raises(ValueError, match=r"archive day 0 \(None\)"):
+        parse_archive(js)
 
 
 def test_load_normals_missing_file_is_empty(tmp_path):
@@ -69,3 +85,5 @@ def test_shipped_normals_cover_all_locations_and_months():
             assert v.tmax is not None and v.tmin is not None and v.rain_days_pct is not None, (key, m)
             assert -10 < v.tmin < v.tmax < 50, (key, m)
             assert 0 <= v.rain_days_pct <= 100, (key, m)
+    raw = json.loads(NORMALS_PATH.read_text(encoding="utf-8"))
+    assert {"source", "period", "generated_at"} <= set(raw["_meta"])
