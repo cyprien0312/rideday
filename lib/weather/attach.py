@@ -52,7 +52,7 @@ class WeatherView:
     @property
     def hover(self) -> str:
         if self.tier == "normal":
-            return "2016–2025 同期平均 · 点开看 BOM"
+            return "2016–2025 同期平均 · 点开看 BOM"  # keep in sync with scripts/build_climate_normals.START/END
         wind = "—" if self.wind_kmh is None else f"{round(self.wind_kmh)}"
         mm = "—" if self.rain_mm is None else f"{self.rain_mm:g}"
         head = f"{self.desc} · " if self.desc else ""
@@ -81,7 +81,7 @@ def weather_for(event: Event, forecasts: dict[tuple[str, date], DailyForecast],
 def weather_map(events: list[Event], forecasts, normals, today: date | None = None
                 ) -> dict[str, WeatherView]:
     """{event_uid: WeatherView} for every event that resolves to a tier."""
-    today = today or date.today()
+    today = today if today is not None else date.today()
     out = {}
     for e in events:
         w = weather_for(e, forecasts, normals, today)

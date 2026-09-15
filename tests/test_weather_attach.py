@@ -84,7 +84,7 @@ def test_weather_map_keys_by_event_uid():
 
 
 def test_weather_map_defaults_today():
-    evs = [_ev("Broadford Raceway", date.today() + timedelta(days=1))]
-    m = weather_map(evs, {}, {"broadford": {date.today().month: Normal(1.0, 0.0, 5)}})
-    # tomorrow may roll into next month at month end; either way it resolves without error
-    assert isinstance(m, dict)
+    d = date.today() + timedelta(days=1)
+    evs = [_ev("Broadford Raceway", d)]
+    m = weather_map(evs, {("broadford", d): _fc("broadford", d)}, {})
+    assert m[evs[0].event_uid].tier == "forecast"   # delta 1 <= 7 only if today defaulted correctly
