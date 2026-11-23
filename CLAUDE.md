@@ -52,6 +52,17 @@
 
 ## 坑 / 故意没做的
 
+**运维坑**(线上看板停更,先查这条):
+
+- **GitHub 会自动停用 `schedule`**:repo 连续 **60 天**没有新 commit,整个 workflow 被禁用
+  (`state` = `disabled_inactivity`),cron 不再触发,**push 也不再触发** —— 被禁的是 workflow 本身,不只是 cron。
+  2026-11-24 踩到:最后一次 commit 2026-09-15,整 60 天后(11-14)跑完最后一班 schedule 就停了,
+  看板冻在 11-14 的快照、首页挂着已经跑完的场次(「只显示 `date_start >= 今天`」里的「今天」是**构建时**算的)。
+  最阴的是**历史 run 全是 `success`**,Actions 页面一片绿 —— 「没报错」不等于「在跑」。
+  - 查:`gh api repos/cyprien0312/rideday/actions/workflows --jq '.workflows[] | "\(.path) \(.state)"'`
+  - 恢复:`gh workflow enable .github/workflows/deploy.yml`,再推一个 commit(push 本身把 60 天计时清零)
+  - 只要这个 repo 还是「几个月不动、全靠 cron」的用法,**60 天后会再犯一次**。计时从最后一次 commit 算。
+
 **本质局限**(条件变了才值得重估):
 
 - **列表页给不出精确时段**,所以日历事件一律全天。Champions 列表层完全没有时间,PIRD/SMSP 只有

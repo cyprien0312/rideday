@@ -3,7 +3,7 @@
 > 短期记忆。开工先读这里:此刻是什么状态 + 还剩什么。
 > 长期结论进 `docs/notes/`,决策进 `docs/decisions.md`,过程进 `sessions/`。
 
-**最后更新:2026-09-15**
+**最后更新:2026-11-24**
 
 ## 此刻状态
 
@@ -11,18 +11,27 @@
 
 | provider | 状态 | 本轮抓到 |
 |---|---|---|
-| `champions` | ok | 67 |
-| `phillip_island` (PIRD) | ok | 15 |
-| `smsp` | ok | 19 |
+| `champions` | ok | 23 |
+| `phillip_island` (PIRD) | ok | 23 |
+| `smsp` | ok | 31 |
 | `weather` (Open-Meteo) | ok | 8 地点 |
+
+> **2026-11-24 事故:线上停更 10 天,已修。** 2026-09-15 之后没再 commit,整 60 天后
+> (2026-11-14)GitHub 按「repo 不活动」把 workflow 自动停用(`state=disabled_inactivity`),
+> cron 和 push 都不再触发,看板冻在 11-14 的快照、首页挂着已经跑完的场次。
+> **代码没坏**:离线 114 条、联网 smoke 4 条、三站真实抓取全过,解析器行为与 11-14 一致
+> (旧页 89 格 − 已过期 12 场 = 77,和本轮新抓的 77 吻合)。
+> 修法:`gh workflow enable` + 推一次 commit(清零 60 天计时)。详见 CLAUDE.md「运维坑」。
+> champions 67 → 23 是官网自己的挂牌量变化,不是掉量(站点真实 23 张卡,无分页)。
 
 - 线上:https://cyprien0312.github.io/rideday/ ,GitHub Actions 每 6 小时 + 每次 push 重建并发布。
 - 本地实时版:`./scripts/run.sh` → http://127.0.0.1:8765
 - **日历订阅(2026-08-03 新增)**:每次发布同时生成 `all.ics` + 每个州一个 `.ics`。
-  本轮:all(125) / nsw(18) / qld(24) / sa(42) / vic(33) / wa(8)。
+  本轮:all(77) / nsw(31) / sa(15) / vic(27) / wa(4)。**这轮没有 `qld.ics`**(QLD 暂时没有未来场次,
+  feed 按数据里出现的州动态生成)—— 之前订过 qld 的客户端会拿到 404,见待办 8。
   实现在 `lib/ics.py`(纯函数,离线可测),口径见 README「订阅到日历」一节。
 - **天气(2026-09-15 新增)**:每行一个天气格,三档 预报(≤7 天)/ 远期预报(8–15 天)/ N 月平均,
-  点开是该赛道的 BOM 预报页。本轮 101 场全部有天气:forecast 4 / outlook 14 / normal 83。
+  点开是该赛道的 BOM 预报页。本轮 77 场全部有天气:forecast 8 / outlook 10 / normal 59。
   实现在 `lib/weather/`,口径见 README「天气」一节;**BOM 只做链接不解析**(见 CLAUDE.md)。
   线上已发布(Actions run 34938788380 success)。
 
@@ -35,6 +44,8 @@
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
 | 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
 | 6 | 天气 review 遗留小项(都不阻塞) | ① 本地版旧预报行没有「年龄」提示:Open-Meteo 连挂几天,几天前的行仍显示「预报」,`fetched_at` 存了但没读回;② 7/8 地点成功时 LED 只写「抓取失败」,不显示计数;③ `DailyForecast` 定义在 `forecast.py`,让 `lib.store` 传递依赖 requests,挪到 `lib/models.py` 可切断 |
+| 7 | 防 `schedule` 再被 GitHub 停用 | **60 天计时已被 2026-11-24 这次 commit 清零,下次到期 ~2026-01-23。**候选:① workflow 末尾加 keepalive(快到 45 天时自己推一个空 commit,要给 workflow `contents: write`);② 本机/外部 cron 定期 `gh workflow run`(依赖机器开着或存 token);③ 不防,只加「看板多久没更新」的可见提示。**没定,等你拍。** |
+| 8 | 州 feed 会整个消失 | 某州暂时没有未来场次时(这轮的 QLD),那个 `.ics` 根本不生成,已订阅的客户端拿 404 而不是空日历。要么对已知州一律出空 feed,要么接受。设计上是「不硬编码州列表」的代价 |
 
 ### 已关闭
 
