@@ -67,8 +67,17 @@
   - keepalive 相关、**已经实测过**的两件事(别再重新怀疑):
     ① job 级 `permissions: contents: write` **能**压过 repo 级 `default_workflow_permissions: read`
     (`main` 无 branch protection、rulesets 为空的前提下,强制 dispatch 真推成功);
-    ② 保活 commit 带 `[skip ci]` 不会触发新 run —— 这不是为了省算力,顶层 `cancel-in-progress: true`
-    不跳的话保活 push 会把**正在跑的 deploy 自己掐掉**。
+    ② 保活 commit 带 skip-ci 标记不会触发新 run。要这个标记的理由是顶层 `cancel-in-progress: true`
+    —— 不跳的话保活 push 触发的新 run 会把**正在跑的 deploy 自己掐掉**。
+    另外保活这一路其实有两重保险:**用 `GITHUB_TOKEN` 推的 push 本身就不触发 workflow**,
+    所以光看 bot 那次 push 没有 run,分不清是哪条规则起的作用。
+- ⚠️ **commit message 里不要出现 skip-ci 那个字面标记,连「解释它」都不行。**
+  GitHub 只看 head commit message 里有没有那个串,不管你是在用它还是在描述它。
+  2026-11-24 实测:`e512891` 的正文里引用这个标记来解释 workflow,整个构建就被跳过,
+  Actions 里**连一条 run 都不出现**(不是失败,是没有),很难发现。
+  要在 commit 里提它就写「skip-ci 标记」,别带方括号。
+  (这次意外反而成了干净旁证:那是**我本人**推的、不是 `GITHUB_TOKEN`,
+  所以单独证明了这个标记本身有效。)
   - keepalive **唯一没验证**的前提:bot 推的 commit 是否真的重置 GitHub 的 60 天计时。
     只能等 ~2026-01-23 那个窗口才知道。真失效了就回到上面那条查 `state` 的流程。
 

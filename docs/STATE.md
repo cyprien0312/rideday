@@ -57,8 +57,9 @@
   **凭据(强制 dispatch 实测,不是推理)**:`gh workflow run deploy.yml -f keepalive_threshold_days=0`
   → run 45294254680 三个 job 全 success,日志里 `要不要推:true` → `5e8f07e..7891e7d  HEAD -> main`
   **push 成功**,证明 job 级 `contents: write` 压得过 repo 级 `default_workflow_permissions: read`;
-  且 `7891e7d` 没有触发任何新 run,证明 `[skip ci]` 生效(否则 `cancel-in-progress: true`
-  会让保活 push 掐掉正在跑的 deploy)。
+  skip-ci 标记也确认有效,但凭据不是 `7891e7d`(bot 那次 `GITHUB_TOKEN` 推的 push 本身就不触发
+  workflow,两条规则分不开),而是 `e512891` —— 那次我**本人**推,只因为 message 正文里
+  引用了这个标记来解释代码,整个构建就没出现过 run。坑已记进 CLAUDE.md。
   **仍未验证**:bot commit 是否真的重置 GitHub 的 60 天计时 —— 只能等 ~2026-01-23 那个窗口。
 
 - ~~线上验证天气列~~ —— 2026-09-15 关闭。凭据:push `9cf437a` 触发 Actions run 34938788380 → `success`;
