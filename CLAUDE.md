@@ -61,7 +61,16 @@
   最阴的是**历史 run 全是 `success`**,Actions 页面一片绿 —— 「没报错」不等于「在跑」。
   - 查:`gh api repos/cyprien0312/rideday/actions/workflows --jq '.workflows[] | "\(.path) \(.state)"'`
   - 恢复:`gh workflow enable .github/workflows/deploy.yml`,再推一个 commit(push 本身把 60 天计时清零)
-  - 只要这个 repo 还是「几个月不动、全靠 cron」的用法,**60 天后会再犯一次**。计时从最后一次 commit 算。
+  - **2026-11-24 起有 keepalive 兜着**:`keepalive` job(在 `deploy.yml`)快到 45 天时自己推一个
+    空 commit 清零计时;要不要推是 `lib/keepalive.py` 的纯函数,离线有测。
+    手动强制验证:`gh workflow run deploy.yml -f keepalive_threshold_days=0`。
+  - keepalive 相关、**已经实测过**的两件事(别再重新怀疑):
+    ① job 级 `permissions: contents: write` **能**压过 repo 级 `default_workflow_permissions: read`
+    (`main` 无 branch protection、rulesets 为空的前提下,强制 dispatch 真推成功);
+    ② 保活 commit 带 `[skip ci]` 不会触发新 run —— 这不是为了省算力,顶层 `cancel-in-progress: true`
+    不跳的话保活 push 会把**正在跑的 deploy 自己掐掉**。
+  - keepalive **唯一没验证**的前提:bot 推的 commit 是否真的重置 GitHub 的 60 天计时。
+    只能等 ~2026-01-23 那个窗口才知道。真失效了就回到上面那条查 `state` 的流程。
 
 **本质局限**(条件变了才值得重估):
 

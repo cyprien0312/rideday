@@ -7,7 +7,8 @@
 
 ## 此刻状态
 
-三个 provider + 天气全绿,离线单测 114 条 + 联网 smoke 4 条全过。
+三个 provider + 天气全绿,离线单测 122 条 + 联网 smoke 4 条全过。
+定时发布有 keepalive 兜底(2026-11-24 加,见下)。
 
 | provider | 状态 | 本轮抓到 |
 |---|---|---|
@@ -44,10 +45,21 @@
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
 | 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
 | 6 | 天气 review 遗留小项(都不阻塞) | ① 本地版旧预报行没有「年龄」提示:Open-Meteo 连挂几天,几天前的行仍显示「预报」,`fetched_at` 存了但没读回;② 7/8 地点成功时 LED 只写「抓取失败」,不显示计数;③ `DailyForecast` 定义在 `forecast.py`,让 `lib.store` 传递依赖 requests,挪到 `lib/models.py` 可切断 |
-| 7 | 防 `schedule` 再被 GitHub 停用 | **60 天计时已被 2026-11-24 这次 commit 清零,下次到期 ~2026-01-23。**候选:① workflow 末尾加 keepalive(快到 45 天时自己推一个空 commit,要给 workflow `contents: write`);② 本机/外部 cron 定期 `gh workflow run`(依赖机器开着或存 token);③ 不防,只加「看板多久没更新」的可见提示。**没定,等你拍。** |
 | 8 | 州 feed 会整个消失 | 某州暂时没有未来场次时(这轮的 QLD),那个 `.ics` 根本不生成,已订阅的客户端拿 404 而不是空日历。要么对已知州一律出空 feed,要么接受。设计上是「不硬编码州列表」的代价 |
+| 9 | 四个 action 还在 Node 20 上 | 每次 run 都有 deprecation 警告:`actions/checkout@v4`、`configure-pages@v5`、`setup-python@v5`、`upload-artifact@v4` 都 target Node 20,现在被强制跑在 Node 24。**不是这轮引入的**,但 GitHub 迟早会直接断掉。到时候升大版本号 |
 
 ### 已关闭
+
+- ~~防 `schedule` 再被 GitHub 停用(原待办 7)~~ —— 2026-11-24 关闭,做的是 keepalive(方案 ①)。
+  `deploy.yml` 加 `keepalive` job,快到 45 天时自己推一个空 commit 清零 60 天计时;
+  判断逻辑 `lib/keepalive.py` 是纯函数,`tests/test_keepalive.py` 8 条钉住临界值
+  (44 天 23 小时不推、45 天整推、未来时间戳不推、默认阈值对 60 天留 15 天余量)。
+  **凭据(强制 dispatch 实测,不是推理)**:`gh workflow run deploy.yml -f keepalive_threshold_days=0`
+  → run 45294254680 三个 job 全 success,日志里 `要不要推:true` → `5e8f07e..7891e7d  HEAD -> main`
+  **push 成功**,证明 job 级 `contents: write` 压得过 repo 级 `default_workflow_permissions: read`;
+  且 `7891e7d` 没有触发任何新 run,证明 `[skip ci]` 生效(否则 `cancel-in-progress: true`
+  会让保活 push 掐掉正在跑的 deploy)。
+  **仍未验证**:bot commit 是否真的重置 GitHub 的 60 天计时 —— 只能等 ~2026-01-23 那个窗口。
 
 - ~~线上验证天气列~~ —— 2026-09-15 关闭。凭据:push `9cf437a` 触发 Actions run 34938788380 → `success`;
   `curl -s https://cyprien0312.github.io/rideday/ | tr -s '\n ' ' ' | grep -o 'Open-Meteo · [0-9]* 地点'` → `Open-Meteo · 8 地点`;
