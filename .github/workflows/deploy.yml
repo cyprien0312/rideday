@@ -25,9 +25,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -43,11 +43,14 @@ jobs:
       - name: Build static site
         run: python scripts/build_static.py
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+          # v4 起 dotfile 默认不进 artifact,而 build_static.py 会写 dist/.nojekyll。
+          # 不开这个开关,线上那个文件会悄悄消失(升级前实测它是 200)。
+          include-hidden-files: true
 
   deploy:
     needs: build
@@ -57,7 +60,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # GitHub 会在 repo 连续 60 天没有新 commit 后停用整个 workflow
   # (state=disabled_inactivity),cron 和 push 都不再触发,而且历史 run 全是
@@ -72,7 +75,7 @@ jobs:
     permissions:
       contents: write        # 仅此一项;覆盖顶层的 contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
 
