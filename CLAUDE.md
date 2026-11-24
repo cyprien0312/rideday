@@ -71,6 +71,10 @@
     —— 不跳的话保活 push 触发的新 run 会把**正在跑的 deploy 自己掐掉**。
     另外保活这一路其实有两重保险:**用 `GITHUB_TOKEN` 推的 push 本身就不触发 workflow**,
     所以光看 bot 那次 push 没有 run,分不清是哪条规则起的作用。
+- **`include-hidden-files: true` 是承重配置,别当冗余删掉。** `upload-pages-artifact` 从 v4 起
+  dotfile 默认不进 artifact,而 `scripts/build_static.py` 会写 `dist/.nojekyll`。
+  删掉那个开关,线上这个文件就悄悄没了 —— 页面本身照常渲染,极难发现。
+  查:`curl -so /dev/null -w '%{http_code}' https://cyprien0312.github.io/rideday/.nojekyll` 应为 200。
 - ⚠️ **commit message 里不要出现 skip-ci 那个字面标记,连「解释它」都不行。**
   GitHub 只看 head commit message 里有没有那个串,不管你是在用它还是在描述它。
   2026-11-24 实测:`e512891` 的正文里引用这个标记来解释 workflow,整个构建就被跳过,

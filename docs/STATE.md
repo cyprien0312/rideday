@@ -46,9 +46,21 @@
 | 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
 | 6 | 天气 review 遗留小项(都不阻塞) | ① 本地版旧预报行没有「年龄」提示:Open-Meteo 连挂几天,几天前的行仍显示「预报」,`fetched_at` 存了但没读回;② 7/8 地点成功时 LED 只写「抓取失败」,不显示计数;③ `DailyForecast` 定义在 `forecast.py`,让 `lib.store` 传递依赖 requests,挪到 `lib/models.py` 可切断 |
 | 8 | 州 feed 会整个消失 | 某州暂时没有未来场次时(这轮的 QLD),那个 `.ics` 根本不生成,已订阅的客户端拿 404 而不是空日历。要么对已知州一律出空 feed,要么接受。设计上是「不硬编码州列表」的代价 |
-| 9 | 四个 action 还在 Node 20 上 | 每次 run 都有 deprecation 警告:`actions/checkout@v4`、`configure-pages@v5`、`setup-python@v5`、`upload-artifact@v4` 都 target Node 20,现在被强制跑在 Node 24。**不是这轮引入的**,但 GitHub 迟早会直接断掉。到时候升大版本号 |
 
 ### 已关闭
+
+- ~~四个 action 还在 Node 20 上(原待办 9)~~ —— 2026-11-24 关闭,顺带多升了一个。
+  `checkout` v4→v7、`setup-python` v5→v7、`configure-pages` v5→v6、
+  `upload-pages-artifact` v3→v5、`deploy-pages` v4→v5(这个本来没报警告,但也落后一个大版本)。
+  原先报的 `upload-artifact@v4` 不是工作流里直接写的,是 `upload-pages-artifact@v3` 的**传递依赖**,
+  v5 内部已把它钉到 v7.0.0,所以一并消失。
+  **跨大版本读 release notes 查到两条,都处理了**:
+  ① `upload-pages-artifact` v4 起 dotfile 默认不进 artifact,而 `build_static.py:101` 会写
+  `dist/.nojekyll` → 显式加 `include-hidden-files: true`,升级前后线上那个文件都是 `200 / 0 bytes`;
+  ② `checkout` v6 改成「凭据存到单独文件」,而 keepalive 的 `git push` 正依赖它 →
+  强制 dispatch 实测仍能推(run 45296885104,`0617bb3..b425254  HEAD -> main`)。
+  **凭据**:push run 45296696364 `build/deploy success`、`keepalive skipped`、**Node 20 警告消失**;
+  站点 11:23 新鲜、77 场、0 警告,5 个 feed 与 `static/*` 全 200。
 
 - ~~防 `schedule` 再被 GitHub 停用(原待办 7)~~ —— 2026-11-24 关闭,做的是 keepalive(方案 ①)。
   `deploy.yml` 加 `keepalive` job,快到 45 天时自己推一个空 commit 清零 60 天计时;
