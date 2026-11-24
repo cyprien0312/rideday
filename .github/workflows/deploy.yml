@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "0 */6 * * *"   # every 6 hours (UTC) — refresh the ride-day data
   workflow_dispatch:          # manual "Run workflow" button
+    inputs:
+      keepalive_threshold_days:
+        description: "距上次 commit 多少天就推保活空 commit(传 0 = 强制推一次,用来验证权限)"
+        required: false
+        default: "45"
 
 permissions:
   contents: read
@@ -53,3 +58,40 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # GitHub 会在 repo 连续 60 天没有新 commit 后停用整个 workflow
+  # (state=disabled_inactivity),cron 和 push 都不再触发,而且历史 run 全是
+  # success、不发任何告警 —— 2026-11-24 就这么停更了 10 天。快到期时自己推一个
+  # 空 commit 把计时清零。判断逻辑在 lib/keepalive.py(纯函数,离线有测)。
+  keepalive:
+    # 故意不写 needs: build —— 保活的目的就是别让 cron 死掉,
+    # 构建坏了的时候反而更需要它继续活着。
+    # push 事件本身已经把计时清零了,不用再推。
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # 仅此一项;覆盖顶层的 contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 判断要不要保活
+        id: check
+        run: |
+          THRESHOLD="${{ github.event.inputs.keepalive_threshold_days || '45' }}"
+          LAST=$(git log -1 --format=%ct)
+          echo "最后一次 commit:$(git log -1 --format=%cI)(阈值 ${THRESHOLD} 天)"
+          VERDICT=$(python3 -m lib.keepalive --last-commit-ts "$LAST" --threshold-days "$THRESHOLD")
+          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+          echo "要不要推:$VERDICT"
+
+      - name: 推一个空 commit 把 60 天计时清零
+        if: steps.check.outputs.verdict == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # [skip ci] 不是为了省算力:顶层 cancel-in-progress: true,
+          # 不跳的话这个 push 触发的新 run 会把正在跑的 deploy 自己掐掉。
+          git commit --allow-empty -m 'chore: keepalive,防 GitHub 按 60 天不活动停用 schedule [skip ci]'
+          git push origin HEAD:main
