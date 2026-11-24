@@ -28,8 +28,9 @@
 - 线上:https://cyprien0312.github.io/rideday/ ,GitHub Actions 每 6 小时 + 每次 push 重建并发布。
 - 本地实时版:`./scripts/run.sh` → http://127.0.0.1:8765
 - **日历订阅(2026-08-03 新增)**:每次发布同时生成 `all.ics` + 每个州一个 `.ics`。
-  本轮:all(77) / nsw(31) / sa(15) / vic(27) / wa(4)。**这轮没有 `qld.ics`**(QLD 暂时没有未来场次,
-  feed 按数据里出现的州动态生成)—— 之前订过 qld 的客户端会拿到 404,见待办 8。
+  本轮 9 份:all(77) / act(0) / nsw(31) / nt(0) / qld(0) / sa(15) / tas(0) / vic(27) / wa(4)。
+  **2026-11-24 起没场次的州也出空 feed**(原来根本不生成,已订阅的客户端拿 404);
+  页面 chip 只挂非空的,所以观感不变。口径见 CLAUDE.md「日历订阅」。
   实现在 `lib/ics.py`(纯函数,离线可测),口径见 README「订阅到日历」一节。
 - **天气(2026-09-15 新增)**:每行一个天气格,三档 预报(≤7 天)/ 远期预报(8–15 天)/ N 月平均,
   点开是该赛道的 BOM 预报页。本轮 77 场全部有天气:forecast 8 / outlook 10 / normal 59。
@@ -45,9 +46,20 @@
 | 3 | 站点改版监控 | 现在只有「抓 0 条 = 失败」这一层。某站从 20 条掉到 3 条不会报警 |
 | 5 | 天气要不要写进 .ics DESCRIPTION | 改动小(`lib/ics.py` 加一行描述)。看板用一阵子再决定 |
 | 6 | 天气 review 遗留小项(都不阻塞) | ① 本地版旧预报行没有「年龄」提示:Open-Meteo 连挂几天,几天前的行仍显示「预报」,`fetched_at` 存了但没读回;② 7/8 地点成功时 LED 只写「抓取失败」,不显示计数;③ `DailyForecast` 定义在 `forecast.py`,让 `lib.store` 传递依赖 requests,挪到 `lib/models.py` 可切断 |
-| 8 | 州 feed 会整个消失 | 某州暂时没有未来场次时(这轮的 QLD),那个 `.ics` 根本不生成,已订阅的客户端拿 404 而不是空日历。要么对已知州一律出空 feed,要么接受。设计上是「不硬编码州列表」的代价 |
 
 ### 已关闭
+
+- ~~州 feed 会整个消失(原待办 8)~~ —— 2026-11-24 关闭,做法是「数据里出现的州 ∪ `AU_STATES`」,
+  取并集而不是换成硬编码列表,所以原来「数据里冒出没见过的州也要出 feed」那条原则没丢
+  (有测试钉住:`test_unknown_state_in_the_data_still_gets_its_own_feed`)。
+  文件从 5 份变 9 份(`all` + 8 个州/领地),空的是 `act` / `nt` / `qld` / `tas`。
+  **页面 chip 没变**:`advertised_feeds` 只挂非空的 + `all`,所以不会多出一排「0」——
+  文件全发、页面只挂非空,这是两件事。空 feed 带 `REFRESH-INTERVAL:PT6H`,
+  订阅方继续轮询,该州有场次时自动出现。
+  本地版 `/calendar/<州>.ics` 同样受益(以前也 404)。
+  **凭据**:离线测试 128 passed(新增 6 条);本地构建 `wrote 9 calendar feeds: all.ics(77),
+  act.ics(0), nsw.ics(31), nt.ics(0), qld.ics(0), sa.ics(15), tas.ics(0), vic.ics(27), wa.ics(4)`,
+  页面 chip 仍是 all/nsw/sa/vic/wa 五个、计数不变,`dist/.nojekyll` 仍在。
 
 - ~~四个 action 还在 Node 20 上(原待办 9)~~ —— 2026-11-24 关闭,顺带多升了一个。
   `checkout` v4→v7、`setup-python` v5→v7、`configure-pages` v5→v6、

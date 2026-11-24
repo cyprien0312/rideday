@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-from lib.ics import build_feeds, render_feed
+from lib.ics import advertised_feeds, build_feeds, render_feed
 from lib.registry import PROVIDERS
 from lib.scrape import run_all
 from lib.store import Store
@@ -73,8 +73,10 @@ def create_app() -> FastAPI:
             "weather": _weather(events),
             "asset_base": "/static",
             "static_mode": False,
+            # 空州 feed 的文件照样服务,只是不往页面上挂(见 lib.ics.advertised_feeds)
             "feeds": [{"slug": f.slug, "label": f.label, "count": len(f.events),
-                       "href": f"/calendar/{f.filename}"} for f in build_feeds(events)],
+                       "href": f"/calendar/{f.filename}"}
+                      for f in advertised_feeds(build_feeds(events))],
         })
 
     @app.get("/api/events")

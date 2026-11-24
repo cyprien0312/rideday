@@ -22,7 +22,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE))
 
-from lib.ics import build_feeds, render_feed  # noqa: E402
+from lib.ics import advertised_feeds, build_feeds, render_feed  # noqa: E402
 from lib.registry import PROVIDERS  # noqa: E402
 from lib.scrape import run_all  # noqa: E402
 from lib.store import Store  # noqa: E402
@@ -93,8 +93,10 @@ def main() -> int:
         asset_base="static",       # relative -> works under the /rideday/ Pages subpath
         static_mode=True,
         generated_at=_now_sydney(),
+        # 空州 feed 的文件照样发布(URL 要稳定),只是不往页面上挂一排「0」
         feeds=[{"slug": f.slug, "label": f.label, "count": len(f.events),
-                "href": f"webcal://{webcal_base}/{f.filename}"} for f in feeds],
+                "href": f"webcal://{webcal_base}/{f.filename}"}
+               for f in advertised_feeds(feeds)],
     )
     (dist / "index.html").write_text(html, encoding="utf-8")
     shutil.copytree(BASE / "static", dist / "static")

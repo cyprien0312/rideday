@@ -139,9 +139,27 @@ class Feed:
         return f"{self.slug}.ics"
 
 
+#: 澳洲所有州/领地。某州这一轮没有场次也照样出一份空 feed —— 否则那个 `.ics`
+#: 根本不生成,已经订阅的客户端会拿到 404 而不是一个空日历(2026-11-24 的 QLD
+#: 就是这样:9 月有 24 场、11 月全部跑完,qld.ics 就消失了)。
+AU_STATES = ("ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA")
+
+
+def advertised_feeds(feeds: list[Feed]) -> list[Feed]:
+    """页面上挂出来的订阅链接:`all` 加上有场次的州。
+
+    空的州 feed **文件照样发布**(订阅 URL 必须稳定),只是不往页面上挂一排「0」。
+    """
+    return [f for f in feeds if f.slug == "all" or f.events]
+
+
 def build_feeds(events: list[Event]) -> list[Feed]:
-    """One feed per state present in the data, plus an `all` feed. `all` comes first."""
-    by_state: dict[str, list[Event]] = {}
+    """每个州一个 feed(数据里出现的州 ∪ `AU_STATES`)加一个 `all`;`all` 在最前。
+
+    取**并集**而不是只按 `AU_STATES`:数据里冒出没见过的州(将来真有 NZ 赛道的话)
+    照样要出 feed —— 这是原来「不硬编码州列表」那条约定要保的东西。
+    """
+    by_state: dict[str, list[Event]] = {s: [] for s in AU_STATES}
     for e in events:
         if e.state:
             by_state.setdefault(e.state.upper(), []).append(e)

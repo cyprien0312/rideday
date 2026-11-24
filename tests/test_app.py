@@ -38,8 +38,13 @@ def test_calendar_feed_is_served_per_state_and_all(tmp_path, monkeypatch):
     assert r.headers["content-type"].startswith("text/calendar")
     assert "BEGIN:VEVENT" in r.text and "Broadford" in r.text
 
-    assert client.get("/calendar/vic.ics").status_code == 404  # seeded event has no state
-    assert client.get("/calendar/nope.ics").status_code == 404
+    # 已知州即使这一轮没场次也出一份空 feed,订阅链接才不会 404(seeded event 没有州)
+    r_vic = client.get("/calendar/vic.ics")
+    assert r_vic.status_code == 200
+    assert r_vic.headers["content-type"].startswith("text/calendar")
+    assert "BEGIN:VEVENT" not in r_vic.text
+
+    assert client.get("/calendar/nope.ics").status_code == 404  # 既不是州,也不在数据里
 
 
 def test_index_links_the_calendar_feeds(tmp_path, monkeypatch):
@@ -121,3 +126,14 @@ def test_index_and_api_show_forecast_tier_when_row_exists(tmp_path, monkeypatch)
 
     w = client.get("/api/events").json()[0]["weather"]
     assert w["tier"] == "forecast" and w["rain_prob"] == 70 and w["desc"] == "雨"
+
+
+def test_index_does_not_link_empty_state_feeds(tmp_path, monkeypatch):
+    """空州 feed 的文件要发布,但页面上不该挂一排「0」的 chip。"""
+    monkeypatch.setenv("RIDEDAY_DB", str(tmp_path / "t.db"))
+    application = appmod.create_app()
+    _seed(application)            # 这场没有州 -> 所有州 feed 都是空的
+    page = TestClient(application).get("/").text
+    assert "/calendar/all.ics" in page
+    assert "/calendar/qld.ics" not in page
+    assert "/calendar/vic.ics" not in page

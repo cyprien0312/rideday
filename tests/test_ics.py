@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 
 import pytest
 
-from lib.ics import build_feeds, render_ics
+from lib.ics import AU_STATES, Feed, advertised_feeds, build_feeds, render_feed, render_ics
 from lib.models import Event, Status
 
 NOW = datetime(2026, 8, 3, 4, 30, 0, tzinfo=timezone.utc)
@@ -152,26 +152,72 @@ def test_build_feeds_makes_one_feed_per_state_plus_all():
     evs = [mk(state="VIC"), mk(state="VIC", d=date(2026, 9, 21)),
            mk(state="NSW", track="Sydney Motorsport Park")]
     feeds = {f.slug: f for f in build_feeds(evs)}
-    assert set(feeds) == {"all", "vic", "nsw"}
+    assert set(feeds) == {"all"} | {s.lower() for s in AU_STATES}
     assert len(feeds["all"].events) == 3
     assert len(feeds["vic"].events) == 2
+    assert len(feeds["nsw"].events) == 1
     assert feeds["vic"].filename == "vic.ics" and "VIC" in feeds["vic"].name
 
 
 def test_events_without_a_state_only_land_in_the_all_feed():
-    evs = [mk(state=None, track="Mystery Track"), mk(state="VIC")]
+    mystery = mk(state=None, track="Mystery Track")
+    evs = [mystery, mk(state="VIC")]
     feeds = {f.slug: f for f in build_feeds(evs)}
-    assert set(feeds) == {"all", "vic"}
     assert len(feeds["all"].events) == 2
     assert len(feeds["vic"].events) == 1
+    # 没有州的那场不该落进任何一个州 feed
+    assert all(mystery.event_uid not in {e.event_uid for e in f.events}
+               for slug, f in feeds.items() if slug != "all")
 
 
 def test_all_feed_comes_first_then_states_alphabetically():
-    evs = [mk(state="WA"), mk(state="NSW"), mk(state="VIC")]
-    assert [f.slug for f in build_feeds(evs)] == ["all", "nsw", "vic", "wa"]
+    # 带一个不在 AU_STATES 里的州,顺带证明排序是在并集上做的
+    evs = [mk(state="WA"), mk(state="NSW"), mk(state="NZ")]
+    expected = ["all"] + sorted({s.lower() for s in AU_STATES} | {"nz"})
+    assert [f.slug for f in build_feeds(evs)] == expected
 
 
 @pytest.mark.parametrize("state", ["vic", "Vic", "VIC"])
 def test_state_slug_is_case_insensitive(state):
     feeds = {f.slug: f for f in build_feeds([mk(state=state)])}
     assert "vic" in feeds and feeds["vic"].name.endswith("VIC")
+
+
+# --- 空州 feed:订阅链接要稳定 ----------------------------------------------
+
+def test_every_au_state_gets_a_feed_even_when_it_has_no_events():
+    # 某州暂时没有未来场次时,那个 .ics 以前根本不生成,已订阅的客户端拿 404。
+    feeds = {f.slug: f for f in build_feeds([mk(state="VIC")])}
+    assert set(feeds) == {"all"} | {s.lower() for s in AU_STATES}
+    assert len(feeds["vic"].events) == 1
+    assert feeds["qld"].events == []          # 没场次,但文件得在
+    assert feeds["qld"].filename == "qld.ics"
+
+
+def test_unknown_state_in_the_data_still_gets_its_own_feed():
+    # 回归守卫:原来「按数据里出现的州动态分 feed」那条不许因为加了已知州列表而丢掉
+    feeds = {f.slug: f for f in build_feeds([mk(state="NZ", track="Hampton Downs")])}
+    assert "nz" in feeds and len(feeds["nz"].events) == 1
+
+
+def test_empty_state_feed_renders_a_valid_calendar_with_no_events():
+    feeds = {f.slug: f for f in build_feeds([mk(state="VIC")])}
+    out = render_feed(feeds["qld"], now=NOW)
+    assert "BEGIN:VEVENT" not in out
+    assert out.startswith("BEGIN:VCALENDAR\r\n") and out.endswith("END:VCALENDAR\r\n")
+
+
+def _feed(slug, events):
+    return Feed(slug, slug.upper(), f"x · {slug}", events)
+
+
+def test_advertised_feeds_hides_empty_states_but_keeps_all():
+    # 空 feed 文件照样发布(URL 要稳定),只是不往页面上挂一排「0」
+    e = mk(state="VIC")
+    feeds = [_feed("all", [e]), _feed("vic", [e]), _feed("qld", []), _feed("tas", [])]
+    assert [f.slug for f in advertised_feeds(feeds)] == ["all", "vic"]
+
+
+def test_advertised_feeds_keeps_all_even_when_it_is_empty():
+    # 回归守卫:all 不管空不空都要留着,否则页面上订阅区会整块消失
+    assert [f.slug for f in advertised_feeds([_feed("all", [])])] == ["all"]
